@@ -5,14 +5,13 @@ output:
       toc: FALSE
 ---
 
-![Photo of me in my office](IMG_6240.jpg){width=250}
----
+## ![Photo of me in my office](IMG_6240.jpg){width="250"}
 
-# Background 
+# Background
 
 Hi everyone! My name is Deanna Lanier, and I am in my 3rd year in the bioinformatics Ph.D. program working in Dr. Arthur (Art) Edison's lab. I received my undergraduate degree in health science from Spelman College in the spring of 2020 and started at UGA the following fall as an IOB student. My research focuses on utilizing non-targeted NMR metabolomics concepts and computational methods to understand how exposures to toxic chemicals affect overall health propensities. I am primarily interested in how the toxins, PFAS, affect the progression of respiratory infections and how AGEs modulate metabolic processes.
 
-### Statistics and Programming Experience
+### Statistics and Programming Experience 
 
 I have a good understanding of general statistics concepts and a more advanced understanding of the concepts that are more common in my research and lab. My programming language of choice is **python**; however, I am proficient in Matlab and Java as well. I have used R for some basic statistical analysis and plotting, but I am not as proficient or comfortable with the syntax and available packages (yet).
 
@@ -26,9 +25,10 @@ I hope to become more proficient in R and more comfortable using Github/R. R is 
 2.  I am a classically trained dancer. I have been a dancer for 22 years and still find time to get into the studio now and then.
 3.  I am obsessed with Marvel Universe and Disney/Pixar movies.
 
-### Video about Data pre-processing 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/7EA5Dk2LWXk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+### Video about Data pre-processing
 
-This video is a great overview of the importance of "preparing" you data. This preparation stage is integral to the integrity of all the analysis completed downstream. 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/7EA5Dk2LWXk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>
 
+</iframe>
 
+This video is a great overview of the importance of "preparing" you data. This preparation stage is integral to the integrity of all the analysis completed downstream.
