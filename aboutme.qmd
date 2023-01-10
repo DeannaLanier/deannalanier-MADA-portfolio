@@ -23,6 +23,7 @@ I hope to become more proficient in R and more comfortable using Github/R. R is 
 
 1.  I run a non-profit called Gifted Girls of Grace based in Atlanta. Here's [our website](https://giftedgirlsofgrace.org/) if you want to read more about our work within the community.
 2.  I am a classically trained dancer. I have been a dancer for 22 years and still find time to get into the studio now and then.
+3. I am obsessed with Marvel Universe and Disney movies.
 
 ### Video about Data pre-processing
 
