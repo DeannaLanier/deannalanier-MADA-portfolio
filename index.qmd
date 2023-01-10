@@ -1,16 +1,15 @@
 ---
-title: "My website and data analysis portfolio"
+title: "Deanna Lanier's website and data analysis portfolio"
 output: 
   html_document:
     toc: FALSE
 ---
 
-# Hello
+# Hi There!
 
-### And hello again
+### Welcome to **my website** and *data analysis portfolio*
 
-Welcome to **my website** and _data analysis portfolio._ 
+Hi everyone, I am Deanna Lanier. This website will be used for the **Spring 2023** Modern Applied Data Analysis course.
 
-
-* Please use the `Menu Bar` above to look around.
-* Have fun!
+-   Read more about me on my `About Me` page above.
+-   Looking forward to a great semester!
