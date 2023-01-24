@@ -5,124 +5,136 @@ output:
     toc: FALSE
 ---
 
-Placeholder file for the future R coding exercise.
-
-
+## ##
+# Load and check the data for the exercise
 
 ```{r}
-  #install and load required pakages
-#install.packages("dslabs")   #install and load dslabs for gapminder dataset
-
-library(dslabs)  #install and load dslabs for gapminder dataset
-
-library(ggplot2)  #load for plotting
-
-library(dplyr) #for data processing/cleaning
-
-library(tidyr) #for data processing/cleaning
-
-library(skimr) #for nice visualization of data 
-
-library(here) #to set paths
-
-library(broom) #for cleaning up output from lm()
-
-
-
+#install and load required packages
+library(tidyverse)
 ```
 
 ```{r}
-#load and view gapminder data set
+#install and load required packages
+library(dslabs)
+#find gapminder data to be used for exercise
+#help(gapminder)
+```
 
-help(gapminder) #look at help file for gapminder data
-
+```{r}
 str(gapminder) #get an overview of the data structure
+```
 
+```{r}
 summary(gapminder) #get a summary of the data
+```
 
+```{r}
 class(gapminder) #determine the type of object gapminer is 
 ```
 
-```{r}
-# Subset Africa data
+# Process Data and Plotting
 
+```{r}
 #save all data to "data"
 data = gapminder
 
 # subset based on Continent == Africa
 africaData = data[ which(data$continent=="Africa"), ]
 
+str(africaData) #get an overview of the data structure
+```
+
+```{r}
+summary(gapminder) #get a summary of the data
+```
+## ##
+### Infant Mortality and Life Expectancy 
+```{r}
 #Subset Africa infant mortality and life expectancy
 infantM_LifeE = africaData[c("infant_mortality", "life_expectancy")]
-str(infantM_LifeE)
-summary(infantM_LifeE)
 
-
-#Subset Africa population and life expectancy
-pop_LifeE = africaData[c("population", "life_expectancy")]
-str(pop_LifeE)
-summary(pop_LifeE)
+str(infantM_LifeE) #get an overview of the data structure
 ```
 
+```{r}
+summary(infantM_LifeE)#get a summary of the data
+```
+## ##
+**Plot life expectancy as a function of infant mortality **
 ```{r}
 # Plot life expectancy as a function of infant mortality 
+ggplot(infantM_LifeE, aes(x=infant_mortality, y=life_expectancy)) + geom_point()+xlab("Infant Mortality")+ ylab("Life Expectancy (Years)")+
+  theme_bw()
 
-ggplot(infantM_LifeE, aes(x=infant_mortality, y=life_expectancy)) + geom_point()
+```
+## ##
+### Population and Life Expectancy 
+
+```{r}
+#Subset Africa population and life expectancy
+pop_LifeE = africaData[c("population", "life_expectancy")]
+str(pop_LifeE) #get an overview of the data structure
 
 ```
 
 ```{r}
-scatt = ggplot(pop_LifeE, aes(x=population, y=life_expectancy)) + geom_point() 
-scatt
-
-#log transformation using scale_xx()
-scatt +scale_x_continuous(trans='log10')
+summary(pop_LifeE) #get a summary of the data
+```
+## ##
+**Plot life expectancy as a function of population**
+```{r}
+# Plot life expectancy as a function of population
+ggplot(pop_LifeE, aes(x=log(population), y=life_expectancy)) + geom_point() +xlab("Population (log)")+ ylab("Life Expectancy (Years)")+
+  theme_bw()
 
 ```
+
+# More Processing and Plotting
 
 ```{r}
 # determine the years with missing values for NA
 infantNA  = (africaData[is.na(africaData$infant_mortality), ]  )
 table(infantNA$year)
 ```
-
+## ##
+### Year 2000
 ```{r}
 # subset year 2000
-
 y_2000 = africaData[ which(africaData$year=="2000"), ]
-summary(y_2000)
-
+summary(y_2000) #get a summary of the data
 ```
-
+## ##
+**plot life expectancy as a function of infant mortality**
+```{r}
+# Plot life expectancy as a function of infant mortality 
+ggplot(y_2000, aes(x=infant_mortality, y=life_expectancy)) + geom_point() +xlab("Infant Mortality")+ ylab("Life Expectancy (Years)")+
+  theme_bw()
+```
+## ##
+**Plot life expectancy as a function of infant mortality **
 ```{r}
 # Plot life expectancy as a function of infant mortality 
 
-ggplot(infantM_LifeE, aes(x=infant_mortality, y=life_expectancy)) + geom_point()
+ggplot(y_2000, aes(x=log(population), y=life_expectancy)) + geom_point() +xlab("Population (log)")+ ylab("Life Expectancy (Years)")+
+  theme_bw()
 ```
 
+# Simple Fit
+
+
+**linear model to fit outcome = life expectancy and predictor = infant mortality**
 ```{r}
-# Plot life expectancy as a function of infant mortality 
-
-ggplot(y_2000, aes(x=population, y=life_expectancy)) + geom_point() +scale_x_continuous(trans='log10')
-
-
-```
-
-```{r}
-# use lm function and fit life expectancy as the outcome and infant mortality as the predictor. Then use the pipulation size as the predictor (only from 2000) save the result from the two fits into two objects (fit1 and fit2) and apply summary to both 
-
-#outcome second predictor first 
 
 fit1 = lm(life_expectancy~infant_mortality, data=y_2000)
 fit1_table = broom::tidy(fit1)
 print(fit1_table)
-
-
 ```
-
+## ##
+**linear model to fit outcome = life expectancy and predictor = population**
 ```{r}
 fit2 = lm(life_expectancy~population, data=y_2000)
 fit2_table = broom::tidy(fit2)
 print(fit2_table)
-
 ```
+## ##
+Based on the p-values of the linear models, a conclusion can be made that there is a statistical relationship between life expectancy and infant mortality but not life expectancy and population. 
