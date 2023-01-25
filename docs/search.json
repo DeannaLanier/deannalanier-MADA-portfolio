@@ -116,11 +116,18 @@
     "href": "coding_exercise.html#section-8",
     "title": "R Coding Exercise",
     "section": "",
-    "text": "linear model to fit outcome = life expectancy and predictor = population\n\nfit2 = lm(life_expectancy~population, data=y_2000)\nfit2_table = broom::tidy(fit2)\nprint(fit2_table)\n\n# A tibble: 2 × 5\n  term             estimate    std.error statistic  p.value\n  <chr>               <dbl>        <dbl>     <dbl>    <dbl>\n1 (Intercept) 55.9          1.47            38.1   4.51e-38\n2 population   0.0000000276 0.0000000546     0.505 6.16e- 1\n\n\n####this section is added by Weifan\n\n###linear model to predict life expectancy using fertility\nlm1=lm(life_expectancy~fertility, data=y_2000)\ntable1=broom::tidy(lm1)%>%\n  knitr::kable(digits=3)\n###linear model to predict life expectancy using gdp\nlm2=lm(life_expectancy~gdp,data=y_2000)\ntable2=broom::tidy(lm2)%>%\n  knitr::kable(digits=3)\ntable1\n\n\n\n\nterm\nestimate\nstd.error\nstatistic\np.value\n\n\n\n\n(Intercept)\n76.075\n3.348\n22.720\n0\n\n\nfertility\n-3.823\n0.625\n-6.113\n0\n\n\n\n\ntable2\n\n\n\n\nterm\nestimate\nstd.error\nstatistic\np.value\n\n\n\n\n(Intercept)\n55.014\n1.247\n44.106\n0.000\n\n\ngdp\n0.000\n0.000\n2.516\n0.015"
+    "text": "linear model to fit outcome = life expectancy and predictor = population\n\nfit2 = lm(life_expectancy~population, data=y_2000)\nfit2_table = broom::tidy(fit2)\nprint(fit2_table)\n\n# A tibble: 2 × 5\n  term             estimate    std.error statistic  p.value\n  <chr>               <dbl>        <dbl>     <dbl>    <dbl>\n1 (Intercept) 55.9          1.47            38.1   4.51e-38\n2 population   0.0000000276 0.0000000546     0.505 6.16e- 1\n\n\n\n\nthis section is added by Weifan\n\n###linear model to predict life expectancy using fertility\nlm1=lm(life_expectancy~fertility, data=y_2000)\ntable1=broom::tidy(lm1)%>%\n  knitr::kable(digits=3)\n###linear model to predict life expectancy using gdp\nlm2=lm(life_expectancy~gdp,data=y_2000)\ntable2=broom::tidy(lm2)%>%\n  knitr::kable(digits=3)\ntable1\n\n\n\n\nterm\nestimate\nstd.error\nstatistic\np.value\n\n\n\n\n(Intercept)\n76.075\n3.348\n22.720\n0\n\n\nfertility\n-3.823\n0.625\n-6.113\n0\n\n\n\n\ntable2\n\n\n\n\nterm\nestimate\nstd.error\nstatistic\np.value\n\n\n\n\n(Intercept)\n55.014\n1.247\n44.106\n0.000\n\n\ngdp\n0.000\n0.000\n2.516\n0.015"
   },
   {
     "objectID": "coding_exercise.html#section-9",
     "href": "coding_exercise.html#section-9",
+    "title": "R Coding Exercise",
+    "section": "",
+    "text": "Based on the p-values of the linear models, a conclusion can be made that there is a statistical relationship between life expectancy and infant mortality but not life expectancy and population. ###this section is added by Weifan based on the p_values of two models, we can conclude that life expectancy can be predicted by both variables (fertility and GDP)"
+  },
+  {
+    "objectID": "coding_exercise.html#section-10",
+    "href": "coding_exercise.html#section-10",
     "title": "R Coding Exercise",
     "section": "",
     "text": "Based on the p-values of the linear models, a conclusion can be made that there is a statistical relationship between life expectancy and infant mortality but not life expectancy and population. ###this section is added by Weifan based on the p_values of two models, we can conclude that life expectancy can be predicted by both variables (fertility and GDP)"

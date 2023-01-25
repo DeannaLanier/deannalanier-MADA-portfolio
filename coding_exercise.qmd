@@ -47,7 +47,7 @@ str(africaData) #get an overview of the data structure
 ```{r}
 summary(gapminder) #get a summary of the data
 ```
-####this section added by Weifan
+####**this section added by Weifan**
 
 ```{r}
 ##did you mean to do below instead of get a summary of gapminder?
@@ -113,7 +113,7 @@ infantNA  = (africaData[is.na(africaData$infant_mortality), ]  )
 table(infantNA$year)
 ```
 
-####this section is added by Weifan
+####**this section is added by Weifan**
 ```{r}
 #using filter and count functions
 infantNA2=africaData%>%
@@ -143,7 +143,7 @@ ggplot(y_2000, aes(x=infant_mortality, y=life_expectancy)) + geom_point() +xlab(
 ggplot(y_2000, aes(x=log(population), y=life_expectancy)) + geom_point() +xlab("Population (log)")+ ylab("Life Expectancy (Years)")+
   theme_bw()
 ```
-#####This section added by Weifan
+#####**This section added by Weifan**
 ```{r}
 ###plot life expectancy as a function of fertility
 y_2000%>%
@@ -176,7 +176,8 @@ fit2 = lm(life_expectancy~population, data=y_2000)
 fit2_table = broom::tidy(fit2)
 print(fit2_table)
 ```
-####this section is added by Weifan
+####
+**this section is added by Weifan**
 ```{r}
 ###linear model to predict life expectancy using fertility
 lm1=lm(life_expectancy~fertility, data=y_2000)
