@@ -45,7 +45,7 @@ str(africaData) #get an overview of the data structure
 ```
 
 ```{r}
-summary(gapminder) #get a summary of the data
+summary(africaData) #get a summary of the data
 ```
 ## ##
 ### Infant Mortality and Life Expectancy 
