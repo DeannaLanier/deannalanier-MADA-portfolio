@@ -587,21 +587,60 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <p>#####<strong>This section added by Weifan</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="do">###plot life expectancy as a function of fertility</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>y_2000<span class="sc">%&gt;%</span></span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>fertility,<span class="at">y=</span>life_expectancy))<span class="sc">+</span></span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color=</span><span class="st">"red"</span>)<span class="sc">+</span></span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"fertility"</span>,<span class="at">y=</span><span class="st">"life_expectancy"</span>, <span class="at">title=</span><span class="st">"relationship between life expectancy and fertility"</span>)<span class="sc">+</span></span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="do">###find out if there is any missing value of fertility and gdp in year 2000</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(y_2000)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         country        year      infant_mortality life_expectancy
+ Algeria     : 1   Min.   :2000   Min.   : 12.30   Min.   :37.60  
+ Angola      : 1   1st Qu.:2000   1st Qu.: 60.80   1st Qu.:51.75  
+ Benin       : 1   Median :2000   Median : 80.30   Median :54.30  
+ Botswana    : 1   Mean   :2000   Mean   : 78.93   Mean   :56.36  
+ Burkina Faso: 1   3rd Qu.:2000   3rd Qu.:103.30   3rd Qu.:60.00  
+ Burundi     : 1   Max.   :2000   Max.   :143.30   Max.   :75.00  
+ (Other)     :45                                                  
+   fertility       population             gdp               continent 
+ Min.   :1.990   Min.   :    81154   Min.   :2.019e+08   Africa  :51  
+ 1st Qu.:4.150   1st Qu.:  2304687   1st Qu.:1.274e+09   Americas: 0  
+ Median :5.550   Median :  8799165   Median :3.238e+09   Asia    : 0  
+ Mean   :5.156   Mean   : 15659800   Mean   :1.155e+10   Europe  : 0  
+ 3rd Qu.:5.960   3rd Qu.: 17391242   3rd Qu.:8.654e+09   Oceania : 0  
+ Max.   :7.730   Max.   :122876723   Max.   :1.329e+11                
+                                                                      
+                       region  
+ Eastern Africa           :16  
+ Western Africa           :16  
+ Middle Africa            : 8  
+ Northern Africa          : 6  
+ Southern Africa          : 5  
+ Australia and New Zealand: 0  
+ (Other)                  : 0  </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="do">###since there is no missing value in year 2000, we still choose this year to plot life expectancy as a function of fertility</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>y_2000<span class="sc">%&gt;%</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>fertility,<span class="at">y=</span>life_expectancy,<span class="at">color=</span>region))<span class="sc">+</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">"lm"</span>,<span class="at">se=</span><span class="cn">FALSE</span>,<span class="at">color=</span><span class="st">"green"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
 <div class="cell-output-display">
 <p><img src="coding_exercise_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
 </div>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="do">###plot life expectancy as a function of gdp</span></span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>y_2000<span class="sc">%&gt;%</span></span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>gdp,<span class="at">y=</span>life_expectancy))<span class="sc">+</span></span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="st">"triangle"</span>)<span class="sc">+</span></span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"gdp"</span>,<span class="at">y=</span><span class="st">"life_expectancy"</span>, <span class="at">title=</span><span class="st">"relationship between life expectancy and gdp"</span>)<span class="sc">+</span></span>
-<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>(<span class="at">labels=</span>scales<span class="sc">::</span><span class="fu">dollar_format</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"fertility"</span>,<span class="at">y=</span><span class="st">"life_expectancy"</span>, <span class="at">title=</span><span class="st">"relationship between life expectancy and fertility"</span>)<span class="sc">+</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NULL</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="do">###plot life expectancy as a function of gdp</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>y_2000<span class="sc">%&gt;%</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>gdp,<span class="at">y=</span>life_expectancy,<span class="at">color=</span>region))<span class="sc">+</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">"lm"</span>,<span class="at">se=</span><span class="cn">FALSE</span>,<span class="at">color=</span><span class="st">"red"</span>)<span class="sc">+</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"gdp"</span>,<span class="at">y=</span><span class="st">"life_expectancy"</span>, <span class="at">title=</span><span class="st">"relationship between life expectancy and gdp in five different regions"</span>)<span class="sc">+</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>(<span class="at">labels=</span>scales<span class="sc">::</span><span class="fu">dollar_format</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
 <div class="cell-output-display">
 <p><img src="coding_exercise_files/figure-html/unnamed-chunk-21-2.png" class="img-fluid" width="672"></p>
 </div>
@@ -612,9 +651,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1>Simple Fit</h1>
 <p><strong>linear model to fit outcome = life expectancy and predictor = infant mortality</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>fit1 <span class="ot">=</span> <span class="fu">lm</span>(life_expectancy<span class="sc">~</span>infant_mortality, <span class="at">data=</span>y_2000)</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>fit1_table <span class="ot">=</span> broom<span class="sc">::</span><span class="fu">tidy</span>(fit1)</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(fit1_table)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>fit1 <span class="ot">=</span> <span class="fu">lm</span>(life_expectancy<span class="sc">~</span>infant_mortality, <span class="at">data=</span>y_2000)</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>fit1_table <span class="ot">=</span> broom<span class="sc">::</span><span class="fu">tidy</span>(fit1)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(fit1_table)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 5
   term             estimate std.error statistic  p.value
@@ -627,9 +666,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2 class="anchored" data-anchor-id="section-8"></h2>
 <p><strong>linear model to fit outcome = life expectancy and predictor = population</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>fit2 <span class="ot">=</span> <span class="fu">lm</span>(life_expectancy<span class="sc">~</span>population, <span class="at">data=</span>y_2000)</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>fit2_table <span class="ot">=</span> broom<span class="sc">::</span><span class="fu">tidy</span>(fit2)</span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(fit2_table)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>fit2 <span class="ot">=</span> <span class="fu">lm</span>(life_expectancy<span class="sc">~</span>population, <span class="at">data=</span>y_2000)</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>fit2_table <span class="ot">=</span> broom<span class="sc">::</span><span class="fu">tidy</span>(fit2)</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(fit2_table)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 5
   term             estimate    std.error statistic  p.value
@@ -642,15 +681,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h4 class="anchored" data-anchor-id="section-9"></h4>
 <p><strong>this section is added by Weifan</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="do">###linear model to predict life expectancy using fertility</span></span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>lm1<span class="ot">=</span><span class="fu">lm</span>(life_expectancy<span class="sc">~</span>fertility, <span class="at">data=</span>y_2000)</span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>table1<span class="ot">=</span>broom<span class="sc">::</span><span class="fu">tidy</span>(lm1)<span class="sc">%&gt;%</span></span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">digits=</span><span class="dv">3</span>)</span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="do">###linear model to predict life expectancy using gdp</span></span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>lm2<span class="ot">=</span><span class="fu">lm</span>(life_expectancy<span class="sc">~</span>gdp,<span class="at">data=</span>y_2000)</span>
-<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>table2<span class="ot">=</span>broom<span class="sc">::</span><span class="fu">tidy</span>(lm2)<span class="sc">%&gt;%</span></span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">digits=</span><span class="dv">3</span>)</span>
-<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>table1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="do">###linear model to predict life expectancy using fertility</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>lm1<span class="ot">=</span><span class="fu">lm</span>(life_expectancy<span class="sc">~</span>fertility, <span class="at">data=</span>y_2000)</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>table1<span class="ot">=</span>broom<span class="sc">::</span><span class="fu">tidy</span>(lm1)<span class="sc">%&gt;%</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">digits=</span><span class="dv">3</span>)</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a><span class="do">###linear model to predict life expectancy using gdp</span></span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>lm2<span class="ot">=</span><span class="fu">lm</span>(life_expectancy<span class="sc">~</span>gdp,<span class="at">data=</span>y_2000)</span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>table2<span class="ot">=</span>broom<span class="sc">::</span><span class="fu">tidy</span>(lm2)<span class="sc">%&gt;%</span></span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">digits=</span><span class="dv">3</span>)</span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>table1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="table table-sm table-striped">
 <thead>
@@ -680,7 +719,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </tbody>
 </table>
 </div>
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>table2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>table2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="table table-sm table-striped">
 <thead>
