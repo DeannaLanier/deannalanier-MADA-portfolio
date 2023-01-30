@@ -145,17 +145,21 @@ ggplot(y_2000, aes(x=log(population), y=life_expectancy)) + geom_point() +xlab("
 ```
 #####**This section added by Weifan**
 ```{r}
-###plot life expectancy as a function of fertility
+###find out if there is any missing value of fertility and gdp in year 2000
+summary(y_2000)
+###since there is no missing value in year 2000, we still choose this year to plot life expectancy as a function of fertility
 y_2000%>%
-  ggplot(aes(x=fertility,y=life_expectancy))+
-  geom_point(color="red")+
+  ggplot(aes(x=fertility,y=life_expectancy,color=region))+
+  geom_point()+
+  geom_smooth(method="lm",se=FALSE,color="green")
   labs(x="fertility",y="life_expectancy", title="relationship between life expectancy and fertility")+
   theme_minimal()
 ###plot life expectancy as a function of gdp
 y_2000%>%
-  ggplot(aes(x=gdp,y=life_expectancy))+
-  geom_point(shape="triangle")+
-  labs(x="gdp",y="life_expectancy", title="relationship between life expectancy and gdp")+
+  ggplot(aes(x=gdp,y=life_expectancy,color=region))+
+  geom_point()+
+  geom_smooth(method="lm",se=FALSE,color="red")+
+  labs(x="gdp",y="life_expectancy", title="relationship between life expectancy and gdp in five different regions")+
   scale_x_log10(labels=scales::dollar_format())
 ```
 
