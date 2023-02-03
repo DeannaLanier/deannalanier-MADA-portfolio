@@ -37,7 +37,7 @@ library(lubridate)
 ## Load Data
 
 ```{r}
-Raw_Data <- read_csv("data-analysis-exercise/data/Provisional_COVID-19_Deaths_by_Sex_and_Age.csv")
+Raw_Data <- read_csv("dataanalysis-exercise/data/Provisional_COVID-19_Deaths_by_Sex_and_Age.csv")
 ```
 
 ## Data Contents
@@ -111,25 +111,16 @@ data
 # Save Data and Summary
 
 ```{r}
-#summary(data)
-summary_df = data.frame(do.call(cbind, lapply(data, summary)))
-print(summary_df)
-```
-
-
-```{r}
 str_data = str(data)
 summary_data = summary(data)
 
 summary_data
-
-
 ```
 
 
 # Save RDS File
 
 ```{r}
-saveRDS(data, file = "data-analysis-exercise/clean/clean_data.rds")
-saveRDS(summary_data, file = "data-analysis-exercise/output/data_summary.rds")
+saveRDS(data, file = "dataanalysis-exercise/output/clean_data.rds")
+saveRDS(summary_data, file = "dataanalysis-exercise/output/data_summary.rds")
 ```

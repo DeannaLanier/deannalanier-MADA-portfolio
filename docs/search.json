@@ -131,5 +131,40 @@
     "title": "R Coding Exercise",
     "section": "",
     "text": "Based on the p-values of the linear models, a conclusion can be made that there is a statistical relationship between life expectancy and infant mortality but not life expectancy and population. ###this section is added by Weifan based on the p_values of two models, we can conclude that life expectancy can be predicted by both variables (fertility and GDP)"
+  },
+  {
+    "objectID": "dataanalysis_exercise.html",
+    "href": "dataanalysis_exercise.html",
+    "title": "Data Analysis Exercise",
+    "section": "",
+    "text": "This data set contains the deaths involving COVID-19, pneumonia, and influenza reported to NCHS by sex, age group, and jurisdiction\n\n\nThis data was obtained from the Centers for Disease Control and Prevention (CDC)’s National Center for Health Statistics (NCHS).\n\n\n\nThis dataset contains 116,000 rows and 16 columns."
+  },
+  {
+    "objectID": "dataanalysis_exercise.html#load-libraries",
+    "href": "dataanalysis_exercise.html#load-libraries",
+    "title": "Data Analysis Exercise",
+    "section": "Load Libraries",
+    "text": "Load Libraries\n\n\n── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──\n✔ ggplot2 3.4.0      ✔ purrr   1.0.1 \n✔ tibble  3.1.8      ✔ dplyr   1.0.10\n✔ tidyr   1.2.1      ✔ stringr 1.5.0 \n✔ readr   2.1.3      ✔ forcats 0.5.2 \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nLoading required package: timechange\n\n\nAttaching package: 'lubridate'\n\n\nThe following objects are masked from 'package:base':\n\n    date, intersect, setdiff, union"
+  },
+  {
+    "objectID": "dataanalysis_exercise.html#load-data",
+    "href": "dataanalysis_exercise.html#load-data",
+    "title": "Data Analysis Exercise",
+    "section": "Load Data",
+    "text": "Load Data\n\nRaw_Data <- read_csv(\"dataanalysis-exercise/data/Provisional_COVID-19_Deaths_by_Sex_and_Age.csv\")\n\nRows: 115668 Columns: 16\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr (8): Data As Of, Start Date, End Date, Group, State, Sex, Age Group, Foo...\ndbl (8): Year, Month, COVID-19 Deaths, Total Deaths, Pneumonia Deaths, Pneum...\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message."
+  },
+  {
+    "objectID": "dataanalysis_exercise.html#data-contents-1",
+    "href": "dataanalysis_exercise.html#data-contents-1",
+    "title": "Data Analysis Exercise",
+    "section": "Data Contents",
+    "text": "Data Contents\n\nstr(Raw_Data)\n\nspc_tbl_ [115,668 × 16] (S3: spec_tbl_df/tbl_df/tbl/data.frame)\n $ Data As Of                              : chr [1:115668] \"01/25/2023\" \"01/25/2023\" \"01/25/2023\" \"01/25/2023\" ...\n $ Start Date                              : chr [1:115668] \"01/01/2020\" \"01/01/2020\" \"01/01/2020\" \"01/01/2020\" ...\n $ End Date                                : chr [1:115668] \"01/21/2023\" \"01/21/2023\" \"01/21/2023\" \"01/21/2023\" ...\n $ Group                                   : chr [1:115668] \"By Total\" \"By Total\" \"By Total\" \"By Total\" ...\n $ Year                                    : num [1:115668] NA NA NA NA NA NA NA NA NA NA ...\n $ Month                                   : num [1:115668] NA NA NA NA NA NA NA NA NA NA ...\n $ State                                   : chr [1:115668] \"United States\" \"United States\" \"United States\" \"United States\" ...\n $ Sex                                     : chr [1:115668] \"All Sexes\" \"All Sexes\" \"All Sexes\" \"All Sexes\" ...\n $ Age Group                               : chr [1:115668] \"All Ages\" \"Under 1 year\" \"0-17 years\" \"1-4 years\" ...\n $ COVID-19 Deaths                         : num [1:115668] 1098594 413 1446 227 444 ...\n $ Total Deaths                            : num [1:115668] 10215767 59245 105422 11382 17721 ...\n $ Pneumonia Deaths                        : num [1:115668] 1036445 798 2258 496 643 ...\n $ Pneumonia and COVID-19 Deaths           : num [1:115668] 551596 68 367 54 129 ...\n $ Influenza Deaths                        : num [1:115668] 19209 49 367 116 165 ...\n $ Pneumonia, Influenza, or COVID-19 Deaths: num [1:115668] 1600437 1190 3688 780 1115 ...\n $ Footnote                                : chr [1:115668] NA NA NA NA ...\n - attr(*, \"spec\")=\n  .. cols(\n  ..   `Data As Of` = col_character(),\n  ..   `Start Date` = col_character(),\n  ..   `End Date` = col_character(),\n  ..   Group = col_character(),\n  ..   Year = col_double(),\n  ..   Month = col_double(),\n  ..   State = col_character(),\n  ..   Sex = col_character(),\n  ..   `Age Group` = col_character(),\n  ..   `COVID-19 Deaths` = col_double(),\n  ..   `Total Deaths` = col_double(),\n  ..   `Pneumonia Deaths` = col_double(),\n  ..   `Pneumonia and COVID-19 Deaths` = col_double(),\n  ..   `Influenza Deaths` = col_double(),\n  ..   `Pneumonia, Influenza, or COVID-19 Deaths` = col_double(),\n  ..   Footnote = col_character()\n  .. )\n - attr(*, \"problems\")=<externalptr>"
+  },
+  {
+    "objectID": "dataanalysis_exercise.html#determine-what-data-to-keep",
+    "href": "dataanalysis_exercise.html#determine-what-data-to-keep",
+    "title": "Data Analysis Exercise",
+    "section": "Determine what data to keep",
+    "text": "Determine what data to keep\n\n#dfm = data %>% pivot_longer(cols=c('COVID_19_Deaths','Pneumonia_Deaths','Influenza_Deaths'),\n#                    names_to=\"variable\",\n #                   values_to=\"value\")\n#year_plot = ggplot(dfm,aes(x = Year,y = value)) + \n#    geom_bar(aes(fill = variable),stat = \"identity\",position = \"dodge\")+theme(legend.position = \"bottom\")\n\n#age_plot = ggplot(dfm,aes(x = Age_Group,y = value)) + \n#    geom_bar(aes(fill = variable),stat = \"identity\",position = \"dodge\")+theme(legend.position=\"none\",axis.text.x = element_text(size = 10, angle=60, hjust=1))\n\n#grid.arrange(year_plot, age_plot, ncol=2)\n\nAccording to the footnotes column, there are multiple data points that had been suppressed due to NCHS confidentiality standards. Separated by state and/or age have many points that have been suppressed. The best option is to subset the data by year, and keep only rows containing all ages, and states.\nSubset to keep\ncollected in 2020 and 2021\n\ndata = data %>% filter(State == \"United States\",Age_Group==\"All Ages\",Year == 2020 | Year == 2021, Sex == \"All Sexes\")%>%\n  select(Start_Date, End_Date, COVID_19_Deaths,Pneumonia_Deaths,Influenza_Deaths, Group, Sex, Year)\n\n\ndata\n\n# A tibble: 26 × 8\n   Start_Date End_Date   COVID_19_Deaths Pneumonia_D…¹ Influ…² Group Sex   Year \n   <date>     <date>               <dbl>         <dbl>   <dbl> <chr> <chr> <chr>\n 1 2020-01-01 2020-12-31          385666        352010    8787 By Y… All … 2020 \n 2 2021-01-01 2021-12-31          463199        412020    1092 By Y… All … 2021 \n 3 2020-01-01 2020-01-31               6         17909    2125 By M… All … 2020 \n 4 2020-02-01 2020-02-29              25         15740    2373 By M… All … 2020 \n 5 2020-03-01 2020-03-31            7174         22479    2437 By M… All … 2020 \n 6 2020-04-01 2020-04-30           65550         46427    1237 By M… All … 2020 \n 7 2020-05-01 2020-05-31           38329         29010     126 By M… All … 2020 \n 8 2020-06-01 2020-06-30           18026         19294      40 By M… All … 2020 \n 9 2020-07-01 2020-07-31           31135         27121      50 By M… All … 2020 \n10 2020-08-01 2020-08-31           29911         27358      43 By M… All … 2020 \n# … with 16 more rows, and abbreviated variable names ¹​Pneumonia_Deaths,\n#   ²​Influenza_Deaths"
   }
 ]
