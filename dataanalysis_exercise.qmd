@@ -1,0 +1,135 @@
+---
+title: "Data Analysis Exercise"
+output:
+  html_document:
+    toc: FALSE
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+# Data Information
+
+This data set contains the deaths involving COVID-19, pneumonia, and
+influenza reported to NCHS by sex, age group, and jurisdiction
+
+## Data Source
+
+This data was obtained from the [Centers for Disease Control and
+Prevention (CDC)'s National Center for Health Statistics
+(NCHS)](https://data.cdc.gov/NCHS/Provisional-COVID-19-Deaths-by-Sex-and-Age/9bhg-hcku).
+
+## Data Contents
+
+This dataset contains 116,000 rows and 16 columns.
+
+# Data Loading and Processing
+
+## Load Libraries
+
+```{r echo = FALSE}
+# Load Libraries
+library(tidyverse)
+library(gtsummary)
+library(lubridate)
+```
+
+## Load Data
+
+```{r}
+Raw_Data <- read_csv("data-analysis-exercise/data/Provisional_COVID-19_Deaths_by_Sex_and_Age.csv")
+```
+
+## Data Contents
+
+```{r}
+str(Raw_Data)
+```
+
+# Cleaning Data of interest
+
+Remove special characters from column names
+
+```{r}
+
+# Save copy of the raw data to clean
+data = Raw_Data
+
+#remove special characters
+names(data) = gsub(" ", "_",
+           gsub("-", "_",
+           gsub(",", "", names(data))))
+```
+
+**Change data types where necessary.**\
+character -\> date\
+numeric -\> character
+
+```{r}
+data = data %>% 
+  mutate_at(
+    vars('Data_As_Of', 'Start_Date','End_Date'), 
+    as_date,
+    format = "%m-%d-%y"
+    )%>% mutate(Year = as.character(Year))
+```
+
+## Determine what data to keep
+
+```{r}
+dfm = data %>% pivot_longer(cols=c('COVID_19_Deaths','Pneumonia_Deaths','Influenza_Deaths'),
+                    names_to="variable",
+                    values_to="value")
+year_plot = ggplot(dfm,aes(x = Year,y = value)) + 
+    geom_bar(aes(fill = variable),stat = "identity",position = "dodge")+theme(legend.position = "bottom")
+
+age_plot = ggplot(dfm,aes(x = Age_Group,y = value)) + 
+    geom_bar(aes(fill = variable),stat = "identity",position = "dodge")+theme(legend.position="none",axis.text.x = element_text(size = 10, angle=60, hjust=1))
+
+grid.arrange(year_plot, age_plot, ncol=2)
+
+```
+
+According to the footnotes column, there are multiple data points that
+had been suppressed due to NCHS confidentiality standards. Separated by
+state and/or age have many points that have been suppressed. The best
+option is to subset the data by year, and keep only rows containing all
+ages, and states.
+
+**Subset to keep**\
+collected in 2020 and 2021
+
+```{r}
+data = data %>% filter(State == "United States",Age_Group=="All Ages",Year == 2020 | Year == 2021, Sex == "All Sexes")%>%
+  select(Start_Date, End_Date, COVID_19_Deaths,Pneumonia_Deaths,Influenza_Deaths, Group, Sex, Year)
+```
+
+```{r}
+data
+```
+
+# Save Data and Summary
+
+```{r}
+#summary(data)
+summary_df = data.frame(do.call(cbind, lapply(data, summary)))
+print(summary_df)
+```
+
+
+```{r}
+str_data = str(data)
+summary_data = summary(data)
+
+summary_data
+
+
+```
+
+
+# Save RDS File
+
+```{r}
+saveRDS(data, file = "data-analysis-exercise/clean/clean_data.rds")
+saveRDS(summary_data, file = "data-analysis-exercise/output/data_summary.rds")
+```
