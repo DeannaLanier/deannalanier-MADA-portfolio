@@ -29,8 +29,10 @@ This dataset contains 116,000 rows and 16 columns.
 
 ```{r echo = FALSE}
 # Load Libraries
+install.packages("ggpubr")
+library(ggpubr)
 library(tidyverse)
-library(gtsummary)
+library(gridExtra)
 library(lubridate)
 ```
 
@@ -81,14 +83,16 @@ dfm = data %>% pivot_longer(cols=c('COVID_19_Deaths','Pneumonia_Deaths','Influen
                     names_to="variable",
                     values_to="value")
 year_plot = ggplot(dfm,aes(x = Year,y = value)) + 
-    geom_bar(aes(fill = variable),stat = "identity",position = "dodge")+theme(legend.position = "bottom")
+    geom_bar(aes(fill = variable),stat = "identity",position = "dodge")+theme(legend.position = "bottom",legend.key.width= unit(0.1, 'cm'), legend.title= element_blank(),axis.text.x=element_text(size=9))
 
 age_plot = ggplot(dfm,aes(x = Age_Group,y = value)) + 
     geom_bar(aes(fill = variable),stat = "identity",position = "dodge")+theme(legend.position="none",axis.text.x = element_text(size = 10, angle=60, hjust=1))
 
-grid.arrange(year_plot, age_plot, ncol=2)
 
+year_plot
+age_plot
 ```
+
 
 According to the footnotes column, there are multiple data points that
 had been suppressed due to NCHS confidentiality standards. Separated by
@@ -100,19 +104,19 @@ ages, and states.
 collected in 2020 and 2021
 
 ```{r}
-data = data %>% filter(State == "United States",Age_Group=="All Ages",Year == 2020 | Year == 2021, Sex == "All Sexes")%>%
+clean_data = data %>% filter(State == "United States",Age_Group=="All Ages",Year == 2020 | Year == 2021, Sex == "All Sexes")%>%
   select(Start_Date, End_Date, COVID_19_Deaths,Pneumonia_Deaths,Influenza_Deaths, Group, Sex, Year)
 ```
 
 ```{r}
-data
+clean_data
 ```
 
 # Save Data and Summary
 
 ```{r}
-str_data = str(data)
-summary_data = summary(data)
+str_data = str(clean_data)
+summary_data = summary(clean_data)
 
 summary_data
 ```

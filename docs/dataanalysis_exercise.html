@@ -233,6 +233,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
 ✖ dplyr::filter() masks stats::filter()
 ✖ dplyr::lag()    masks stats::lag()
+
+Attaching package: 'gridExtra'
+
+
+The following object is masked from 'package:dplyr':
+
+    combine
+
+
 Loading required package: timechange
 
 
@@ -333,26 +342,40 @@ numeric -&gt; character</p>
 <section id="determine-what-data-to-keep" class="level2">
 <h2 class="anchored" data-anchor-id="determine-what-data-to-keep">Determine what data to keep</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#dfm = data %&gt;% pivot_longer(cols=c('COVID_19_Deaths','Pneumonia_Deaths','Influenza_Deaths'),</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#                    names_to="variable",</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a> <span class="co">#                   values_to="value")</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#year_plot = ggplot(dfm,aes(x = Year,y = value)) + </span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#    geom_bar(aes(fill = variable),stat = "identity",position = "dodge")+theme(legend.position = "bottom")</span></span>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>dfm <span class="ot">=</span> data <span class="sc">%&gt;%</span> <span class="fu">pivot_longer</span>(<span class="at">cols=</span><span class="fu">c</span>(<span class="st">'COVID_19_Deaths'</span>,<span class="st">'Pneumonia_Deaths'</span>,<span class="st">'Influenza_Deaths'</span>),</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">names_to=</span><span class="st">"variable"</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">values_to=</span><span class="st">"value"</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>year_plot <span class="ot">=</span> <span class="fu">ggplot</span>(dfm,<span class="fu">aes</span>(<span class="at">x =</span> Year,<span class="at">y =</span> value)) <span class="sc">+</span> </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">fill =</span> variable),<span class="at">stat =</span> <span class="st">"identity"</span>,<span class="at">position =</span> <span class="st">"dodge"</span>)<span class="sc">+</span><span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>,<span class="at">legend.key.width=</span> <span class="fu">unit</span>(<span class="fl">0.3</span>, <span class="st">'cm'</span>), <span class="at">legend.title=</span> <span class="fu">element_blank</span>())</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#age_plot = ggplot(dfm,aes(x = Age_Group,y = value)) + </span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#    geom_bar(aes(fill = variable),stat = "identity",position = "dodge")+theme(legend.position="none",axis.text.x = element_text(size = 10, angle=60, hjust=1))</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>age_plot <span class="ot">=</span> <span class="fu">ggplot</span>(dfm,<span class="fu">aes</span>(<span class="at">x =</span> Age_Group,<span class="at">y =</span> value)) <span class="sc">+</span> </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">fill =</span> variable),<span class="at">stat =</span> <span class="st">"identity"</span>,<span class="at">position =</span> <span class="st">"dodge"</span>)<span class="sc">+</span><span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>,<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>, <span class="at">angle=</span><span class="dv">60</span>, <span class="at">hjust=</span><span class="dv">1</span>))</span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#grid.arrange(year_plot, age_plot, ncol=2)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#grid.arrange(year_plot, age_plot, ncol=2)</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>year_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 91149 rows containing missing values (`geom_bar()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="dataanalysis_exercise_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>age_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 91149 rows containing missing values (`geom_bar()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="dataanalysis_exercise_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid" width="672"></p>
+</div>
 </div>
 <p>According to the footnotes column, there are multiple data points that had been suppressed due to NCHS confidentiality standards. Separated by state and/or age have many points that have been suppressed. The best option is to subset the data by year, and keep only rows containing all ages, and states.</p>
 <p><strong>Subset to keep</strong><br>
 collected in 2020 and 2021</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">=</span> data <span class="sc">%&gt;%</span> <span class="fu">filter</span>(State <span class="sc">==</span> <span class="st">"United States"</span>,Age_Group<span class="sc">==</span><span class="st">"All Ages"</span>,Year <span class="sc">==</span> <span class="dv">2020</span> <span class="sc">|</span> Year <span class="sc">==</span> <span class="dv">2021</span>, Sex <span class="sc">==</span> <span class="st">"All Sexes"</span>)<span class="sc">%&gt;%</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Start_Date, End_Date, COVID_19_Deaths,Pneumonia_Deaths,Influenza_Deaths, Group, Sex, Year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>clean_data <span class="ot">=</span> data <span class="sc">%&gt;%</span> <span class="fu">filter</span>(State <span class="sc">==</span> <span class="st">"United States"</span>,Age_Group<span class="sc">==</span><span class="st">"All Ages"</span>,Year <span class="sc">==</span> <span class="dv">2020</span> <span class="sc">|</span> Year <span class="sc">==</span> <span class="dv">2021</span>, Sex <span class="sc">==</span> <span class="st">"All Sexes"</span>)<span class="sc">%&gt;%</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Start_Date, End_Date, COVID_19_Deaths,Pneumonia_Deaths,Influenza_Deaths, Group, Sex, Year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>clean_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 26 × 8
    Start_Date End_Date   COVID_19_Deaths Pneumonia_D…¹ Influ…² Group Sex   Year 
@@ -376,7 +399,7 @@ collected in 2020 and 2021</p>
 <section id="save-data-and-summary" class="level1">
 <h1>Save Data and Summary</h1>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>str_data <span class="ot">=</span> <span class="fu">str</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>str_data <span class="ot">=</span> <span class="fu">str</span>(clean_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>tibble [26 × 8] (S3: tbl_df/tbl/data.frame)
  $ Start_Date      : Date[1:26], format: "2020-01-01" "2021-01-01" ...
@@ -388,9 +411,9 @@ collected in 2020 and 2021</p>
  $ Sex             : chr [1:26] "All Sexes" "All Sexes" "All Sexes" "All Sexes" ...
  $ Year            : chr [1:26] "2020" "2021" "2020" "2020" ...</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>summary_data <span class="ot">=</span> <span class="fu">summary</span>(data)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>summary_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>summary_data <span class="ot">=</span> <span class="fu">summary</span>(clean_data)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>summary_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Start_Date            End_Date          COVID_19_Deaths  Pneumonia_Deaths
  Min.   :2020-01-01   Min.   :2020-01-31   Min.   :     6   Min.   : 15624  
@@ -412,8 +435,8 @@ collected in 2020 and 2021</p>
 <section id="save-rds-file" class="level1">
 <h1>Save RDS File</h1>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(data, <span class="at">file =</span> <span class="st">"dataanalysis-exercise/output/clean_data.rds"</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(summary_data, <span class="at">file =</span> <span class="st">"dataanalysis-exercise/output/data_summary.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(data, <span class="at">file =</span> <span class="st">"dataanalysis-exercise/output/clean_data.rds"</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(summary_data, <span class="at">file =</span> <span class="st">"dataanalysis-exercise/output/data_summary.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
