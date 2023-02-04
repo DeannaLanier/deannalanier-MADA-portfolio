@@ -93,7 +93,6 @@ year_plot
 age_plot
 ```
 
-
 According to the footnotes column, there are multiple data points that
 had been suppressed due to NCHS confidentiality standards. Separated by
 state and/or age have many points that have been suppressed. The best
@@ -121,10 +120,26 @@ summary_data = summary(clean_data)
 summary_data
 ```
 
-
 # Save RDS File
 
 ```{r}
 saveRDS(data, file = "dataanalysis-exercise/output/clean_data.rds")
 saveRDS(summary_data, file = "dataanalysis-exercise/output/data_summary.rds")
 ```
+
+#This section was added by Jacob----------------------------------
+
+Examining the relationship between COVID-19 Deaths and Pneumonia Deaths 
+```{r}
+COVID_Deaths = clean_data$COVID_19_Deaths
+Pneumonia_Deaths = clean_data$Pneumonia_Deaths
+plot(COVID_Deaths, Pneumonia_Deaths)
+```
+
+It appears there a really strong postive correlation between Covid 19 deaths and pneumonia death. Lets calculate the correlation coefficient to see if it agrees with the scatter plot above.
+
+```{r}
+cor(COVID_Deaths, Pneumonia_Deaths)
+```
+
+Given the correlation coefficient of 0.99 we can say that covid-19 deaths and pneumonia deaths have a strong postive correlation. 
