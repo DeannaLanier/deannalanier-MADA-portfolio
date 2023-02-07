@@ -5,4 +5,82 @@ output:
     toc: FALSE
 ---
 
-Placeholder file for the future visualization exercise.
+# Data Source 
+
+This data set contains the deaths involving COVID-19, pneumonia, and
+influenza reported to NCHS by sex, age group, and jurisdiction. This data was obtained from the [Centers for Disease Control and
+Prevention (CDC)'s National Center for Health Statistics
+(NCHS)](https://data.cdc.gov/NCHS/Provisional-COVID-19-Deaths-by-Sex-and-Age/9bhg-hcku).
+
+I decided to recreate some of my figures from last week as interactive graphs.
+
+## Load Libraries
+
+```{r echo = FALSE}
+# Load Libraries
+install.packages("ggpubr")
+library(ggpubr)
+library(tidyverse)
+library(gridExtra)
+library(lubridate)
+library(here)
+library(plotly)
+```
+
+
+## read in .rds file
+
+```{r}
+data_location=here("dataanalysis-exercise","output","clean_data.rds")
+processedData = readRDS(data_location)
+```
+
+```{r}
+filter(State == "United States",Age_Group=="All Ages",Year == 2020 | Year == 2021, Sex == "All Sexes")%>%
+  select(Start_Date, End_Date, COVID_19_Deaths,Pneumonia_Deaths,Influenza_Deaths, Group, Sex, Year)
+```
+
+
+## Plot 1 static
+
+Plot 1 is bar plot of the COVID_19 deaths, Pneumonia Deaths, and Influenza Deaths between 2020 - 2017 
+
+```{r}
+
+dfm = processedData %>% pivot_longer(cols=c('COVID_19_Deaths','Pneumonia_Deaths','Influenza_Deaths'),
+                    names_to="variable",
+                    values_to="value")
+year_plot = ggplot(dfm,aes(x = Year,y = value)) + 
+    geom_bar(aes(fill = variable),stat = "identity",position = "dodge")+theme(legend.position = "bottom",legend.key.width= unit(0.1, 'cm'), legend.title= element_blank(),axis.text.x=element_text(size=9))
+
+#age_plot = ggplot(dfm,aes(x = Age_Group,y = value)) + 
+#    geom_bar(aes(fill = variable),stat = "identity",position = "dodge")+theme(legend.position="none",axis.text.x = element_text(size = #10, angle=60, hjust=1))
+
+
+year_plot
+#age_plot
+```
+## Plot 1 interactive 
+
+Allow user to interact with the plot by select which virus(es) to include or remove 
+
+
+
+## Plot 1 better visuzalization and interactive 
+
+
+## Learn plotly
+
+```{r}
+fig <- plot_ly() %>% 
+  add_lines(x = c("a","b","c"), y = c(1,3,2))%>% 
+  layout(title="sample figure", xaxis = list(title = 'x'), yaxis = list(title = 'y'), plot_bgcolor = "#c7daec") 
+
+#str(fig$x) 
+
+```
+
+```{r}
+fig
+```
+
