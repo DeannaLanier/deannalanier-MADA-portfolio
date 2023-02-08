@@ -15,7 +15,6 @@ Prevention (CDC)'s National Center for Health Statistics
 I decided to recreate some of my figures from last week as interactive graphs.
 
 
-
 ## Load Libraries
 
 ```{r echo = FALSE}
@@ -23,35 +22,14 @@ I decided to recreate some of my figures from last week as interactive graphs.
 library(here)
 library(plotly)
 library(tidyverse)
+library(lubridate)
 ```
 
 
 ## Read in .rds file
-
 ```{r}
 data_location=here("dataanalysis-exercise","output","clean_data.rds")
 processedData = readRDS(data_location)
-```
-
-
-## Plot static
-
-Bar plot of the COVID_19 deaths, Pneumonia Deaths, and Influenza Deaths between 2020 - 2021 
-
-```{r}
-
-dfm = processedData %>% pivot_longer(cols=c('COVID_19_Deaths','Pneumonia_Deaths','Influenza_Deaths'),
-                    names_to="variable",
-                    values_to="value")
-year_plot = ggplot(dfm,aes(x = Year,y = value)) + 
-    geom_bar(aes(fill = variable),stat = "identity",position = "dodge")+theme(legend.position = "bottom",legend.key.width= unit(0.1, 'cm'), legend.title= element_blank(),axis.text.x=element_text(size=9))
-
-#age_plot = ggplot(dfm,aes(x = Age_Group,y = value)) + 
-#    geom_bar(aes(fill = variable),stat = "identity",position = "dodge")+theme(legend.position="none",axis.text.x = element_text(size = #10, angle=60, hjust=1))
-
-
-year_plot
-#age_plot
 ```
 ## Plot 1 interactive 
 
@@ -62,19 +40,19 @@ data_plot = processedData %>% filter(Group == "By Year")
 ```{r}
 #Create list for each of the variable that we want to separate as differnt buttons 
 
-COVID_19_Deaths = list(
+COVID_19 = list(
   x=processedData$Year, 
   y=processedData$COVID_19_Deaths,
   xref='x', yref='y'
 )
 
-Pneumonia_Deaths = list(
+Pneumonia = list(
   x=processedData$Year, 
   y=processedData$Pneumonia_Deaths,
   xref='x', yref='y'
 )
 
-Influenza_Deaths = list(
+Influenza = list(
   x=processedData$Year, 
   y=processedData$Influenza_Deaths,
   xref='x', yref='y'
@@ -83,7 +61,7 @@ Influenza_Deaths = list(
 ```
 
 ```{r}
-updatemenus <- list(
+updatemenus = list(
   list(
     active = 0,
     type= 'buttons',
@@ -99,21 +77,21 @@ updatemenus <- list(
         method = "update",
         args = list(list(visible = c(TRUE, FALSE, FALSE)),
                     list(title = "Covid-19 Related Deaths",
-                         annotations = list(c(), c(), COVID_19_Deaths)))),
+                         annotations = list(c(), c(), COVID_19)))),
       list(
         label = "Pneumonia",
         method = "update",
         args = list(list(visible = c(FALSE, TRUE, FALSE)),
                     list(title = "Pneumonia Related Deaths ",
-                         annotations = list( c(), Pneumonia_Deaths, c())))),
+                         annotations = list( c(), Pneumonia, c())))),
       list(
         label = "Influenza",
         method = "update",
         args = list(list(visible = c(FALSE, FALSE, TRUE)),
                     list(title = "Influenza Related Deaths",
-                         annotations = list(Influenza_Deaths, c(), c())))),
+                         annotations = list(Influenza, c(), c())))),
       list(
-        label = "Reset",
+        label = "All",
         method = "update",
         args = list(list(visible = c(TRUE, TRUE, TRUE)),
                     list(title = "All Respiratory Virus Related Deaths",
@@ -122,11 +100,69 @@ updatemenus <- list(
 )
 
 
-fig = plot_ly(processedData, x = ~Year, y = ~COVID_19_Deaths, type = 'bar', name = 'Covid-19 Deaths')
-fig = fig %>% add_trace(y = ~Pneumonia_Deaths, name = 'Pneumonia Deaths')
-fig = fig %>% add_trace(y = ~Influenza_Deaths, name = 'Flu Deaths')
-fig = fig %>% layout(title = list(text='All Respiratory Virus Related Deaths', y = 0.95, x = 0.5, xanchor = 'left', yanchor =  'bottom'),yaxis = list(title = 'Count'), barmode = 'group',xaxis = list(title = "Year"),updatemenus=updatemenus)
+bar_fig = plot_ly(processedData, x = ~Year, y = ~COVID_19_Deaths, type = 'bar', name = 'Covid-19 Deaths')%>% 
+  add_trace(y = ~Pneumonia_Deaths, name = 'Pneumonia Deaths')%>% 
+  add_trace(y = ~Influenza_Deaths, name = 'Flu Deaths')%>% 
+  layout(title = list(text='All Respiratory Virus Related Deaths 2020-2021', y = 0.95, x = 0.5, xanchor = 'left', yanchor =  'bottom'),yaxis = list(title = 'Count'), barmode = 'group',xaxis = list(title = "Year"),updatemenus=updatemenus)
 
-fig
+bar_fig
 ```
 
+
+## Plot data over time and add interactive slider
+
+```{r}
+Month_data_location=here("dataanalysis-exercise","data","Provisional_COVID-19_Deaths_by_Sex_and_Age.csv")
+MonthData = read_csv(Month_data_location)
+```
+### Clean the data 
+```{r}
+#remove special characters
+names(MonthData) = gsub(" ", "_",
+           gsub("-", "_",
+           gsub(",", "", names(MonthData))))
+
+MonthData = MonthData %>% 
+  mutate_at(
+    vars('Data_As_Of', 'Start_Date','End_Date'), 
+    as_date,
+    format = "%m-%d-%y"
+    )%>% mutate(Year = as.character(Year)) %>% 
+  filter(State == "United States",Age_Group=="All Ages", Sex == "All Sexes", Group=="By Month", Year == 2020 | Year == 2021 | Year == 2022)%>%
+  select(Start_Date, End_Date, COVID_19_Deaths,Pneumonia_Deaths,Influenza_Deaths, Sex, Year, Month)
+
+```
+
+###Plot
+```{r}
+line_fig = plot_ly(MonthData, type = 'scatter', mode = 'lines', colors = "Set1")%>%
+  add_trace(x = ~Start_Date, y = ~COVID_19_Deaths, name = 'Covid-19 Deaths' )%>%
+  add_trace(x = ~Start_Date,y = ~Pneumonia_Deaths, name = 'Pneumonia Deaths')%>%
+  add_trace(x = ~Start_Date,y = ~Influenza_Deaths, name = 'Flu Deaths')%>%
+  layout(paper_bgcolor='#D4D4D4',plot_bgcolor='#D4D4D4',showlegend = T, title='Respiratory virus related deaths 2020-2022',
+         xaxis = list(rangeslider = list(visible = T),
+                      rangeselector=list(
+                        buttons=list(
+                          list(count=1, label="1m", step="month", stepmode="backward"),
+                          list(count=6, label="6m", step="month", stepmode="backward"),
+                          list(count=1, label="1y", step="year", stepmode="backward"),
+                          list(step="all")
+                        ))))
+line_fig = line_fig %>%
+  layout(
+         xaxis = list(zerolinecolor = '#D4D4D4',
+                      zerolinewidth = 2,
+                      gridcolor = '#D4D4D4',color ='000000', title = 'Date'),
+         yaxis = list(zerolinecolor = '#D4D4D4',
+                      zerolinewidth = 2,
+                      gridcolor = '#D4D4D4', color ='000000',title = '# of Deaths'),
+         plot_bgcolor='#fff', width = 800)
+
+
+line_fig
+```
+
+
+
+##Comments
+Using Plotly in R was fairly straight forward and I didnt not have any difficulty making these plots interactive. My next goal is to figure out how to use the animation features. 
