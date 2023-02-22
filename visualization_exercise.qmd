@@ -166,3 +166,5 @@ line_fig
 
 ##Comments
 Using Plotly in R was fairly straight forward and I didnt not have any difficulty making these plots interactive. My next goal is to figure out how to use the animation features. 
+
+

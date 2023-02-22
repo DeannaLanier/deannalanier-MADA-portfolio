@@ -5,4 +5,306 @@ output:
     toc: FALSE
 ---
 
-Placeholder file for the future Tidy Tuesday exercise.
+## Add Necessary Packages
+
+```{r}
+library(tidytuesdayR)
+library(tidyverse) 
+library(lubridate) #change data type to data
+library(skimr) #skim dataframes
+library(plotly) #interactive plots 
+library(ggstatsplot) #stats plots 
+library(gt) #create tables 
+library(scales) #build unique color pallets
+library(knitr) #format table output
+library(kableExtra)
+```
+
+## Add Data
+
+```{r}
+age_gaps <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-02-14/age_gaps.csv')
+```
+
+## Clean and Explore the data
+
+```{r}
+glimpse(age_gaps)
+```
+
+```{r}
+#Change the column order 
+age_gaps = age_gaps %>%
+  relocate(actor_1_birthdate,actor_1_age,character_1_gender, .after = actor_1_name) %>%
+  relocate(actor_2_birthdate,actor_2_age,character_2_gender, .after = actor_2_name)%>%
+  relocate(couple_number, .before = age_difference)
+```
+
+### Table displaying the data
+
+```{r}
+head(age_gaps) %>% 
+  gt() %>%
+  tab_header(
+    title = "Tidy Tuesday - Hollywood Age Gaps",
+    subtitle = "Reformated"
+  )%>% 
+ tab_style(
+     locations = cells_title(groups = "title"),
+     style     = list(
+       cell_text(weight = "bold", size = 24)
+     ))
+```
+
+### Numeric Data Summary 
+```{r}
+#numeric data summary
+numeric_summary=skim(age_gaps,where(is.numeric))
+numeric_summary = data.frame(numeric_summary)
+
+#Display as a table 
+(numeric_summary) %>% 
+  gt() %>%
+  tab_header(
+    title = "Numeric Data Summary"
+  )%>% 
+ tab_style(
+     locations = cells_title(groups = "title"),
+     style     = list(
+       cell_text(weight = "bold", size = 24)
+     ))
+```
+
+### Determine the age range difference and the count of occurences as a table
+
+```{r}
+#find the frequency of unique age gap values
+ageRange = as.data.frame(table(age_gaps$age_difference)) 
+#rename Var1 to Age_Gap
+ageRange = rename(ageRange, Age_Gap = Var1)
+#ageRange = ageRange %>% arrange(desc(Freq))
+
+#create table based on the frequence
+ageRange_Table = ageRange%>% 
+  gt()%>% 
+cols_label(
+   Age_Gap = md("**Age Gap**"),
+   Freq = md("**Freq**")
+  )%>% 
+  tab_header(
+    title = "Age Gap Frequency",
+  )%>% 
+ tab_style(
+     locations = cells_title(groups = "title"),
+     style     = list(
+       cell_text(weight = "bold", size = 24)
+     ))
+
+#heat map of the frequencies
+minfreq = min(ageRange$Freq)
+maxfreq = max(ageRange$Freq)
+ageGap_Pallet = col_numeric(c("#FEF0D9", "#990000"), domain = c(minfreq, maxfreq), alpha = 0.75)
+
+(ageRange_Table = ageRange_Table %>% 
+    data_color(columns = c(Freq),
+               colors = ageGap_Pallet))
+```
+
+We can see from this table that smaller age gaps are more frequent than larger age gaps. Lets visualize this data as a bar plot
+
+```{r}
+age_bar = ggplot(ageRange, aes(x = Age_Gap, y = Freq)) +
+  geom_col(width = 0.3,color="blue") + theme(axis.text.x = element_text(face="bold", 
+                           size=8, angle=45)) + xlab("Age Gap (Years)") + ylab("Frequency") +ggtitle("Age Gap Frequency") +theme(
+  plot.title = element_text(color="Black", size=14, face="bold"))
+ggplotly(age_bar)
+```
+
+As the age increases, the frequency decreases.
+
+##Sex distribution of the the older and younger actors
+
+```{r}
+#find the frequency of unique age gap values
+actor1Freq = as.data.frame(table(age_gaps$character_1_gender)) 
+#rename Var1 to Age_Gap
+actor1Freq = rename(actor1Freq, Sex = Var1)
+
+#create table based on the frequence
+actor1_Table = actor1Freq%>% 
+  gt()%>% 
+cols_label(
+   Sex = md("**Sex**"),
+   Freq = md("**Freq**")
+  )%>% 
+  tab_header(
+    title = "Actor 1 Frequency",
+  )%>% 
+ tab_style(
+     locations = cells_title(groups = "title"),
+     style     = list(
+       cell_text(weight = "bold", size = 24)
+     ))
+
+#find the frequency of unique age gap values
+actor2Freq = as.data.frame(table(age_gaps$character_2_gender)) 
+#rename Var1 to Age_Gap
+actor2Freq = rename(actor2Freq, Sex = Var1)
+
+#create table based on the frequency
+actor2_Table = actor2Freq%>% 
+  gt()%>% 
+cols_label(
+   Sex = md("**Sex**"),
+   Freq = md("**Freq**")
+  )%>% 
+  tab_header(
+    title = "Actor 2 Frequency",
+  )%>% 
+ tab_style(
+     locations = cells_title(groups = "title"),
+     style     = list(
+       cell_text(weight = "bold", size = 24)
+     ))
+```
+
+
+
+```{r}
+#| tbl-cap: Character Sex Frequency Tables
+#| tbl-subcap: ["Actor 1", "Actor 2"]
+#| layout-ncol: 2
+#| 
+actor1Freq %>%
+  kable("html", align = 'clc') %>%
+    kable_styling(full_width = F, position = "float_left")
+actor2Freq %>%
+  kable("html", align = 'clc') %>%
+    kable_styling(full_width = F, position = "right")
+```
+
+### There are more male older actors and than female. How does the age gap differ?
+```{r}
+ggplot(age_gaps, aes(x=character_1_gender, y=age_difference,color=character_1_gender)) +geom_point() + 
+  geom_line() + geom_boxplot()+ggtitle("Actor 1") +theme(
+  plot.title = element_text(color="Black", size=14, face="bold"))
+```
+**There is a larger age gap for male actors who are older than their partner than female actors who are older. 
+
+###There are more female younger actors and than male How does the age gap differ?
+
+```{r}
+
+ggplot(age_gaps, aes(x=character_2_gender, y=age_difference,color=character_2_gender)) +geom_point() + 
+  geom_line() + geom_boxplot()+ geom_boxplot()+ggtitle("Actor 2") +theme(
+  plot.title = element_text(color="Black", size=14, face="bold"))
+```
+
+###Max Age difference by year
+```{r}
+#plot the max age difference each year over the years 
+Max = age_gaps %>%
+  group_by(release_year) %>%
+  summarise(max = max(age_difference))
+
+ggplot(Max, aes(x = release_year, y = max)) +
+  geom_line()+geom_smooth(method = "loess", color = "red", fill = "red")+ggtitle("Max Age difference by year") +theme(
+  plot.title = element_text(color="Black", size=14, face="bold"))
+```
+
+### Average age difference by year
+```{r}
+#plot the average age difference over the years 
+
+AverageTable = age_gaps %>%
+  group_by(release_year) %>%
+  summarise(average = mean(age_difference))
+
+ggplot(AverageTable, aes(x = release_year, y = average)) +
+  geom_line()+geom_smooth(method = "loess", color = "red", fill = "red")+ggtitle("Average Age difference by year") +theme(
+  plot.title = element_text(color="Black", size=14, face="bold"))
+```
+There were alot more movies created in the later years so this may not be a great representation of the data set and age gaps over time.
+
+### Do certain directors cast actors with larger age gaps?
+
+Directors who cast with smaller age gaps
+```{r}
+d_small=age_gaps%>%
+  select(director,age_difference)%>%
+  filter(age_difference<25)%>%
+  count(director)%>%
+  arrange(desc(n))%>%
+  filter(n>1)
+nrow(d_small)
+
+#create table
+d_small_Table = head(d_small)%>% 
+  gt()%>% 
+cols_label(
+   director = md("**Director**"),
+   n = md("**Freq**")
+  )%>% 
+  tab_header(
+    title = "Directors who cast small age gaps",
+    subtitle = "This table lists the head of the table of directors who cast actors in a movie with an age gap smaller than to 25 years at least 3 times"
+  )%>% 
+ tab_style(
+     locations = cells_title(groups = "title"),
+     style     = list(
+       cell_text(weight = "bold", size = 24)
+     )) %>%
+  tab_source_note(
+    source_note = "There are a total of 245 directors who cast at least 2 movies with age gaps below 25 years of age"
+  )
+
+d_small_Table
+
+dSmall_concat=inner_join(age_gaps,d_small,by="director")
+```
+Directors who cast with larger age gaps (only ones with more than 1)
+```{r}
+d_large=age_gaps%>%
+  select(director,age_difference)%>%
+  filter(age_difference>=25)%>%
+  count(director)%>%
+  arrange(desc(n))%>%
+  filter(n>1)
+d_large
+
+dLarge_concat=inner_join(age_gaps,d_large,by="director")
+
+#create table
+d_large_Table = d_large%>% 
+  gt()%>% 
+cols_label(
+   director = md("**Director**"),
+   n = md("**Freq**")
+  )%>% 
+  tab_header(
+    title = "Directors with large age gaps",
+    subtitle = "This table lists the directors who cast actors in a movie with an aga gap greater than or equal to 25 at least 2 times"
+  )%>% 
+ tab_style(
+     locations = cells_title(groups = "title"),
+     style     = list(
+       cell_text(weight = "bold", size = 24)
+     ))
+
+d_large_Table
+
+
+```
+
+
+```{r}
+p = plot_ly(dLarge_concat, x = ~director, y = ~age_difference,
+             type = "scatter", mode = 'markers', marker = list(color = "blue"), 
+             text =~paste('</br> Director: ', director,
+                      '</br> Movie: ', movie_name,
+                      '</br> Age Gap: ', age_difference),
+             hoverinfo = "text")
+p = p  %>% layout (title = "Directors with age gaps over 25 years and their movies",xaxis = list(title = "Director"), yaxis = list(title = "Age Gap"))
+p
+```
+
