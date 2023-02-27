@@ -1,0 +1,58 @@
+---
+title: "Flu Anlaysis - Wrangling"
+output:
+  html_document:
+    toc: FALSE
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+# Data Loading and Processing
+
+## Load Libraries
+
+```{r echo = FALSE}
+# Load Libraries
+library(tidyverse)
+library(dplyr)
+library(here) 
+library(skimr)
+library(tidyr)
+```
+
+## Load the data
+
+```{r}
+raw_data = readRDS(here("fluanalysis", "data", "SympAct_Any_Pos.Rda")) #load RDS file
+```
+
+## Data Contents
+
+```{r}
+str(raw_data) #ensure the data is complete
+```
+
+## Process data as follows:
+
+**1. Remove all variables that have *Score* or *Total* or *FluA* or
+*FluB* or *Dxname* or *Activity* or *Unique.Visit***
+
+**2. Remove all observations with NA**
+
+Don't do this manually one by one, figure out how to use R commands that
+let you remove things in an efficient manner.
+
+```{r}
+clean_data = raw_data %>% #create new variable to ensure raw_data is not manipulated
+  select(-contains(c("Score","Total","FluA","FluB","Dxname","Activity")))%>% #select columns to remove
+  select(-c('Unique.Visit')) %>% #remove collumn
+  na.omit() #remove all observations with NA
+```
+
+## Save RDS File
+
+```{r}
+cleandata_location = here("fluanalysis", "data", "cleandata.rds")
+saveRDS(clean_data, file = cleandata_location)
+```
