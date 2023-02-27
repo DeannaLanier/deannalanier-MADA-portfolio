@@ -17,7 +17,11 @@ website:
           - text: "Tidy Tuesday Exercise"
             href: ./tidytuesday_exercise.html
           - text: "Data Analysis Exercise (Module4)"
-            href: ./dataanalysis_exercise.html           
+            href: ./dataanalysis_exercise.html
+      - text: "Flu Analysis"
+        menu: 
+          - text: "Data Wrangling"
+            href: ./fluanalysis/code/wrangling.html
     right:
       - icon: github 
         href: https://github.com/DeannaLanier/deannalanier-MADA-portfolio        
