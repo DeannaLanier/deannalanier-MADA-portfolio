@@ -23,7 +23,7 @@ website:
           - text: "Data Wrangling"
             href: ./fluanalysis/code/wrangling.html
           - text: "Data Exploration"
-            href: ./fluanalysis/code/wrangling.html
+            href: ./fluanalysis/code/exploration.html
           - text: "Model Fitting"
             href: ./fluanalysis/code/wrangling.html
             
