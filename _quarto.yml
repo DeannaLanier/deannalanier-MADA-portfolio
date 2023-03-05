@@ -22,6 +22,11 @@ website:
         menu: 
           - text: "Data Wrangling"
             href: ./fluanalysis/code/wrangling.html
+          - text: "Data Exploration"
+            href: ./fluanalysis/code/wrangling.html
+          - text: "Model Fitting"
+            href: ./fluanalysis/code/wrangling.html
+            
     right:
       - icon: github 
         href: https://github.com/DeannaLanier/deannalanier-MADA-portfolio        
