@@ -1,0 +1,161 @@
+---
+title: "Flu Anlaysis - Exploration"
+output:
+  html_document:
+    toc: FALSE
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+## Load Libraries
+
+```{r echo = FALSE}
+# Load Libraries
+library(tidyverse) #data exploration packages
+library(dplyr) #piping
+library(here) #data location
+library(skimr) #
+library(tidyr)
+library(gt) #create tables 
+library(scales) #build unique color pallets
+library(knitr) #format table output
+library(kableExtra)
+library(plotly)
+library(ggpubr)
+
+```
+
+## Load the data
+
+```{r}
+data = readRDS(here("fluanalysis", "data", "cleandata.rds")) #load RDS file
+```
+
+## For each (important) variable, produce and print some numerical output (e.g. a table or some summary statistics numbers).
+
+Summary table of the Nausea column
+
+```{r}
+#Summary of Nausea
+nausea_summary = data%>% #nasea summary
+  pull(Nausea)%>%
+  summary()%>%
+  as.data.frame()%>%
+  rename(Freq = 1)
+#nausea_Data = data.frame(nausea_Data)
+
+nausea_summary%>%
+gt(rownames_to_stub = TRUE)%>%
+tab_header(
+  title = "Flu Data Nausea Summary table",
+  subtitle = "Frequency of 'Yes' and 'No' Responses"
+)%>% 
+ tab_style(
+     locations = cells_title(groups = "title"),
+     style     = list(
+       cell_text(weight = "bold", size = 24)
+     ))
+```
+
+Summary table of the body temperature column
+
+```{r}
+bodyTemp_summary = data%>% #bodyTemperature summary
+  pull(BodyTemp)%>%
+  as.data.frame()%>%
+  summary()%>%
+  as.data.frame() %>% 
+  separate(Freq, c('Stat', 'Val'),":")%>% #separate summary statistics at ":"
+  select( -c(1, 2)) #remove the first two empty rows
+
+bodyTemp_summary%>%
+gt(rownames_to_stub = TRUE)%>%
+tab_header(
+  title = "Flu Data Body Temp Summary table",
+  subtitle = "Summary Statistics"
+)%>% 
+ tab_style(
+     locations = cells_title(groups = "title"),
+     style     = list(
+       cell_text(weight = "bold", size = 24)
+     ))
+
+```
+
+## For each (important) continuous variable, create a histogram or density plot.
+
+Body Temperature is the only continuous important variable.
+
+```{r}
+#Body Temperature Histogram
+
+annotation = data.frame(
+   x = c(100),
+   y = c(.5),
+   label = c("Mean")
+)
+
+p = data %>% ggplot(aes(x=BodyTemp)) + geom_histogram(aes(y=..density..), binwidth=0.2,color="black", fill="gray") + geom_density(alpha=.2,fill="#FF6666") + geom_vline(aes(xintercept=mean(BodyTemp)),color="red", linetype="dashed", size=1) + geom_segment(aes(x = 99.8, y = .5, xend = 99, yend = .5), arrow = arrow(length = unit(0.5, "cm"))) + annotate("text", x=100.1, y=0.5, label ="Mean")+ ggtitle("Body Temperature Density") +
+  xlab("Temp") + ylab("Density")+ theme_minimal()
+
+ggplotly(p)
+```
+
+**highest frequency/density is at 98.2(F).**
+
+## Create scatterplots or boxplots or similar plots for the variable you decided is your main outcome of interest and the most important (or all depending on number of variables) independent variables/predictors. For this dataset, you can pick and choose a few predictor variables.
+
+### Outcome Interest # 1 is Body Temperature 
+
+```{r}
+
+#nausea and body temp
+nausea_plot = data %>% ggplot(aes(x=Nausea, y=BodyTemp,fill=Nausea)) + 
+  geom_violin(trim=FALSE) + geom_boxplot(width=0.1, fill="white")+ ggtitle("Body Temp and Nausea")+scale_fill_brewer(palette="Dark2")+theme_minimal()
+#nausea_plot
+
+#Cough and body temp
+cough_plot = data %>% ggplot(aes(x=CoughYN, y=BodyTemp,fill=CoughYN)) + 
+  geom_violin(trim=FALSE) + geom_boxplot(width=0.1, fill="white")+ ggtitle("Body Temp and Cough")+scale_fill_brewer(palette="Dark2")+theme_minimal()
+#cough_plot
+
+#Nasal Congestion and body temp
+nasal_plot = data %>% ggplot(aes(x=NasalCongestion, y=BodyTemp,fill=NasalCongestion)) + 
+  geom_violin(trim=FALSE) + geom_boxplot(width=0.1, fill="white")+ ggtitle("Body Temp and Congestion")+scale_fill_brewer(palette="Dark2")+theme_minimal()
+#nasal_plot
+
+#Runny nose and body temp
+nose_plot = data %>% ggplot(aes(x=RunnyNose, y=BodyTemp,fill=RunnyNose)) + 
+  geom_violin(trim=FALSE) + geom_boxplot(width=0.1, fill="white")+ ggtitle("Body Temp and Runny Nose")+scale_fill_brewer(palette="Dark2")+theme_minimal()
+#nose_plot
+```
+
+```{r}
+ggarrange(nausea_plot, cough_plot,
+          ncol = 2, nrow = 1,common.legend = TRUE, legend = "bottom")
+```
+
+```{r}
+ggarrange(nose_plot, nasal_plot, ncol = 2, nrow = 1, common.legend = TRUE, legend = "bottom")
+```
+
+
+### Outcome interest is Nausea 
+
+```{r}
+
+#Nausea and Diarrhea bar plot
+diarrhea_plot = data  %>% ggplot(aes(x=Nausea,fill = Diarrhea)) + geom_bar(width=0.5) + ggtitle("Nausea and Diarrhea")+scale_fill_brewer(palette="Dark2")+theme_minimal()
+diarrhea_plot
+
+#Nausea and vomit bar plot
+vomit_plot = data  %>% ggplot(aes(x=Nausea,fill = Vomit)) + geom_bar(width=0.5) + ggtitle("Nausea and Vomit")+scale_fill_brewer(palette="Dark2") +theme_minimal()
+#vomit_plot
+```
+
+```{r}
+ggarrange(diarrhea_plot, vomit_plot,
+          ncol = 2, nrow = 1, legend = "bottom")
+```
+

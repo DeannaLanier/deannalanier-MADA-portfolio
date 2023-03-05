@@ -25,7 +25,7 @@ website:
           - text: "Data Exploration"
             href: ./fluanalysis/code/exploration.html
           - text: "Model Fitting"
-            href: ./fluanalysis/code/wrangling.html
+            href: ./fluanalysis/code/fitting.html
             
     right:
       - icon: github 
