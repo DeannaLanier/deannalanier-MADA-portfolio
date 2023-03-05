@@ -106,7 +106,7 @@ ggplotly(p)
 
 ## Create scatterplots or boxplots or similar plots for the variable you decided is your main outcome of interest and the most important (or all depending on number of variables) independent variables/predictors. For this dataset, you can pick and choose a few predictor variables.
 
-### Outcome Interest # 1 is Body Temperature 
+### Outcome Interest \# 1 is Body Temperature
 
 ```{r}
 
@@ -140,8 +140,7 @@ ggarrange(nausea_plot, cough_plot,
 ggarrange(nose_plot, nasal_plot, ncol = 2, nrow = 1, common.legend = TRUE, legend = "bottom")
 ```
 
-
-### Outcome interest is Nausea 
+### Outcome interest is Nausea
 
 ```{r}
 
@@ -158,4 +157,3 @@ vomit_plot = data  %>% ggplot(aes(x=Nausea,fill = Vomit)) + geom_bar(width=0.5) 
 ggarrange(diarrhea_plot, vomit_plot,
           ncol = 2, nrow = 1, legend = "bottom")
 ```
-
