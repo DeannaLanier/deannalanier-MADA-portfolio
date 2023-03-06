@@ -15,12 +15,9 @@ editor:
 library(tidyverse) #data exploration packages
 library(dplyr) #piping
 library(here) #data location
-library(skimr) #
 library(tidyr)
 library(gt) #create tables 
 library(scales) #build unique color pallets
-library(knitr) #format table output
-library(kableExtra)
 library(plotly)
 library(ggpubr)
 
@@ -29,6 +26,7 @@ library(ggpubr)
 ## Load the data
 
 ```{r}
+#path to clean data
 data = readRDS(here("fluanalysis", "data", "cleandata.rds")) #load RDS file
 ```
 
@@ -104,11 +102,14 @@ ggplotly(p)
 
 **highest frequency/density is at 98.2(F).**
 
+
 ## Create scatterplots or boxplots or similar plots for the variable you decided is your main outcome of interest and the most important (or all depending on number of variables) independent variables/predictors. For this dataset, you can pick and choose a few predictor variables.
 
-### Outcome Interest \# 1 is Body Temperature
+### The firstirst outcome Interest  is Body Temperature
 
 ```{r}
+#create violin plots of the outcome of interest and important variables.
+
 
 #nausea and body temp
 nausea_plot = data %>% ggplot(aes(x=Nausea, y=BodyTemp,fill=Nausea)) + 
@@ -132,21 +133,25 @@ nose_plot = data %>% ggplot(aes(x=RunnyNose, y=BodyTemp,fill=RunnyNose)) +
 ```
 
 ```{r}
+#plot 2 on the sample plane
 ggarrange(nausea_plot, cough_plot,
-          ncol = 2, nrow = 1,common.legend = TRUE, legend = "bottom")
+          ncol = 2, nrow = 1, legend = "bottom")
 ```
 
 ```{r}
-ggarrange(nose_plot, nasal_plot, ncol = 2, nrow = 1, common.legend = TRUE, legend = "bottom")
+#plot the other two on the same plane
+ggarrange(nose_plot, nasal_plot, ncol = 2, nrow = 1, legend = "bottom")
 ```
 
-### Outcome interest is Nausea
+### Second outcome interest is Nausea
 
 ```{r}
+#bar plot of the outcome of interest and different variables
+
 
 #Nausea and Diarrhea bar plot
 diarrhea_plot = data  %>% ggplot(aes(x=Nausea,fill = Diarrhea)) + geom_bar(width=0.5) + ggtitle("Nausea and Diarrhea")+scale_fill_brewer(palette="Dark2")+theme_minimal()
-diarrhea_plot
+#diarrhea_plot
 
 #Nausea and vomit bar plot
 vomit_plot = data  %>% ggplot(aes(x=Nausea,fill = Vomit)) + geom_bar(width=0.5) + ggtitle("Nausea and Vomit")+scale_fill_brewer(palette="Dark2") +theme_minimal()
@@ -154,6 +159,7 @@ vomit_plot = data  %>% ggplot(aes(x=Nausea,fill = Vomit)) + geom_bar(width=0.5) 
 ```
 
 ```{r}
+# arrange plots on the same plane
 ggarrange(diarrhea_plot, vomit_plot,
           ncol = 2, nrow = 1, legend = "bottom")
 ```

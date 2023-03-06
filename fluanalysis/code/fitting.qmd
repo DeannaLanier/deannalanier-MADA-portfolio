@@ -1,5 +1,5 @@
 ---
-title: "Flu Anlaysis - Exploration"
+title: "Flu Anlaysis - Model Fitting"
 output:
   html_document:
     toc: FALSE
@@ -8,6 +8,10 @@ editor:
     wrap: 72
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) #removes the warning messages from the markdown output
+```
+
 ## Load Libraries
 
 ```{r echo = FALSE}
@@ -15,147 +19,256 @@ editor:
 library(tidyverse) #data exploration packages
 library(dplyr) #piping
 library(here) #data location
-library(skimr) #
-library(tidyr)
+library(tidymodels) #model fitting
 library(gt) #create tables 
-library(scales) #build unique color pallets
-library(knitr) #format table output
-library(kableExtra)
-library(plotly)
 library(ggpubr)
-
+library(performance)
+library(vip)
+library(qqplotr) #confidence bands
+library(ggplot2)
+library(dotwhisker)
 ```
 
 ## Load the data
 
 ```{r}
+#path to clean data
 data = readRDS(here("fluanalysis", "data", "cleandata.rds")) #load RDS file
 ```
 
-## For each (important) variable, produce and print some numerical output (e.g. a table or some summary statistics numbers).
+## Fit a linear model to the continuous outcome (Body temperature) using only the main predictor of interest.
 
-Summary table of the Nausea column
-
-```{r}
-#Summary of Nausea
-nausea_summary = data%>% #nasea summary
-  pull(Nausea)%>%
-  summary()%>%
-  as.data.frame()%>%
-  rename(Freq = 1)
-#nausea_Data = data.frame(nausea_Data)
-
-nausea_summary%>%
-gt(rownames_to_stub = TRUE)%>%
-tab_header(
-  title = "Flu Data Nausea Summary table",
-  subtitle = "Frequency of 'Yes' and 'No' Responses"
-)%>% 
- tab_style(
-     locations = cells_title(groups = "title"),
-     style     = list(
-       cell_text(weight = "bold", size = 24)
-     ))
-```
-
-Summary table of the body temperature column
+Our main predictor is **Runny Nose**
 
 ```{r}
-bodyTemp_summary = data%>% #bodyTemperature summary
-  pull(BodyTemp)%>%
-  as.data.frame()%>%
-  summary()%>%
-  as.data.frame() %>% 
-  separate(Freq, c('Stat', 'Val'),":")%>% #separate summary statistics at ":"
-  select( -c(1, 2)) #remove the first two empty rows
+#specify linear model to regression model
+model1 = linear_reg() %>% 
+  set_engine("lm") 
 
-bodyTemp_summary%>%
-gt(rownames_to_stub = TRUE)%>%
-tab_header(
-  title = "Flu Data Body Temp Summary table",
-  subtitle = "Summary Statistics"
-)%>% 
- tab_style(
-     locations = cells_title(groups = "title"),
-     style     = list(
-       cell_text(weight = "bold", size = 24)
-     ))
-
+#fit the linear model to our main predictor
+model_fit_1 = model1 %>% 
+  fit(BodyTemp ~ RunnyNose, data=data)
+  model_fit_1
 ```
 
-## For each (important) continuous variable, create a histogram or density plot.
-
-Body Temperature is the only continuous important variable.
+Table of results #1
 
 ```{r}
-#Body Temperature Histogram
-
-annotation = data.frame(
-   x = c(100),
-   y = c(.5),
-   label = c("Mean")
-)
-
-p = data %>% ggplot(aes(x=BodyTemp)) + geom_histogram(aes(y=..density..), binwidth=0.2,color="black", fill="gray") + geom_density(alpha=.2,fill="#FF6666") + geom_vline(aes(xintercept=mean(BodyTemp)),color="red", linetype="dashed", size=1) + geom_segment(aes(x = 99.8, y = .5, xend = 99, yend = .5), arrow = arrow(length = unit(0.5, "cm"))) + annotate("text", x=100.1, y=0.5, label ="Mean")+ ggtitle("Body Temperature Density") +
-  xlab("Temp") + ylab("Density")+ theme_minimal()
-
-ggplotly(p)
+tidy(model_fit_1) #table of model summary
 ```
 
-**highest frequency/density is at 98.2(F).**
-
-## Create scatterplots or boxplots or similar plots for the variable you decided is your main outcome of interest and the most important (or all depending on number of variables) independent variables/predictors. For this dataset, you can pick and choose a few predictor variables.
-
-### Outcome Interest # 1 is Body Temperature 
+#2
 
 ```{r}
-
-#nausea and body temp
-nausea_plot = data %>% ggplot(aes(x=Nausea, y=BodyTemp,fill=Nausea)) + 
-  geom_violin(trim=FALSE) + geom_boxplot(width=0.1, fill="white")+ ggtitle("Body Temp and Nausea")+scale_fill_brewer(palette="Dark2")+theme_minimal()
-#nausea_plot
-
-#Cough and body temp
-cough_plot = data %>% ggplot(aes(x=CoughYN, y=BodyTemp,fill=CoughYN)) + 
-  geom_violin(trim=FALSE) + geom_boxplot(width=0.1, fill="white")+ ggtitle("Body Temp and Cough")+scale_fill_brewer(palette="Dark2")+theme_minimal()
-#cough_plot
-
-#Nasal Congestion and body temp
-nasal_plot = data %>% ggplot(aes(x=NasalCongestion, y=BodyTemp,fill=NasalCongestion)) + 
-  geom_violin(trim=FALSE) + geom_boxplot(width=0.1, fill="white")+ ggtitle("Body Temp and Congestion")+scale_fill_brewer(palette="Dark2")+theme_minimal()
-#nasal_plot
-
-#Runny nose and body temp
-nose_plot = data %>% ggplot(aes(x=RunnyNose, y=BodyTemp,fill=RunnyNose)) + 
-  geom_violin(trim=FALSE) + geom_boxplot(width=0.1, fill="white")+ ggtitle("Body Temp and Runny Nose")+scale_fill_brewer(palette="Dark2")+theme_minimal()
-#nose_plot
+#show results 
+glance(model_fit_1)
 ```
+
+Plot regression model as boxwhisker plot
 
 ```{r}
-ggarrange(nausea_plot, cough_plot,
-          ncol = 2, nrow = 1,common.legend = TRUE, legend = "bottom")
+tidy(model_fit_1) %>% 
+  dwplot(dot_args = list(size = 1, color = "black"),vline = geom_vline(xintercept = 0, colour = "black", linetype = 2),
+         whisker_args = list(color = "blue")) + xlab("Estimate") + theme_minimal()
 ```
+
+**Regression estimate for runny nose as a predictor is nearly -0.3**
+
+plot performance
 
 ```{r}
-ggarrange(nose_plot, nasal_plot, ncol = 2, nrow = 1, common.legend = TRUE, legend = "bottom")
+mp1 = check_model(model_fit_1$fit)
+#model_1_performance
 ```
 
+Adjust the check_model output figure titles. This allows all the text on
+the axis to be legible.
 
-### Outcome interest is Nausea 
+```{r}
+#mp1
+p1 = plot(mp1)
+
+p1[[1]] = p1[[1]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p1[[2]] = p1[[2]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p1[[3]] = p1[[3]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p1[[4]] = p1[[4]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p1[[5]] = p1[[5]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p1 
+```
+
+## Fits another linear model to the continuous outcome using all (important) predictors of interest.
+
+```{r}
+#specify linear model to regression model
+model2 = linear_reg() %>% 
+  set_engine("lm") 
+
+#fit the linear model to all predictors
+model_fit_2 = model2 %>% 
+  fit(BodyTemp ~., data=data)
+  model_fit_2 #table of model summary
+
+```
+
+Table of model summary
+
+```{r}
+tidy(model_fit_2)#table of model summary
+```
+
+Plot regression model as boxwhisker plot
+
+```{r}
+tidy(model_fit_2) %>% 
+  dwplot(dot_args = list(size = 1, color = "black"),vline = geom_vline(xintercept = 0, colour = "black", linetype = 2),
+         whisker_args = list(color = "blue")) + xlab("Estimate") + theme_minimal()
+```
+
+Plot performance
+
+```{r}
+mp2 = check_model(model_fit_2$fit)
+#model_1_performance
+```
+
+Adjust the check_model output figure titles. This allows all the text on
+the axis to be legible.
 
 ```{r}
 
-#Nausea and Diarrhea bar plot
-diarrhea_plot = data  %>% ggplot(aes(x=Nausea,fill = Diarrhea)) + geom_bar(width=0.5) + ggtitle("Nausea and Diarrhea")+scale_fill_brewer(palette="Dark2")+theme_minimal()
-diarrhea_plot
+p2 = plot(mp2)
 
-#Nausea and vomit bar plot
-vomit_plot = data  %>% ggplot(aes(x=Nausea,fill = Vomit)) + geom_bar(width=0.5) + ggtitle("Nausea and Vomit")+scale_fill_brewer(palette="Dark2") +theme_minimal()
-#vomit_plot
+p2[[1]] = p2[[1]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p2[[2]] = p2[[2]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p2[[3]] = p2[[3]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p2[[4]] = p2[[4]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p2[[5]] = p2[[5]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p2[[6]] = p2[[6]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p2
 ```
+
+## Compares the model results for the model with just the main predictor and all predictors.
 
 ```{r}
-ggarrange(diarrhea_plot, vomit_plot,
-          ncol = 2, nrow = 1, legend = "bottom")
+compare_performance(model_fit_1,model_fit_2)
 ```
 
+## Fits a logistic model to the categorical outcome (Nausea) using only the main predictor of interest.
+
+```{r}
+
+#specify linear model logistic_reg() which generalized linear model for binary outcomes
+model3 = logistic_reg() %>% 
+  set_engine("glm") #fit model generalized linear model 
+
+#fit the linear model to our main predictor
+model_fit_3 = model3 %>% 
+  fit(Nausea ~ RunnyNose, data=data)
+  model_fit_3 #table of model summary
+
+```
+
+Table of results
+
+#1
+
+```{r}
+tidy(model_fit_3) #table of model summary
+```
+
+#2
+
+```{r}
+#show results 
+glance(model_fit_3)
+```
+
+Plot model as box whisker plot
+
+```{r}
+tidy(model_fit_3) %>% 
+  dwplot(dot_args = list(size = 1, color = "black"),vline = geom_vline(xintercept = 0, colour = "black", linetype = 2),
+         whisker_args = list(color = "blue")) + xlab("Estimate") + theme_minimal()
+```
+
+**Regression estimate for runny nose as a predictor is nearly 0.05**
+
+plot performance
+
+```{r}
+mp3 = check_model(model_fit_3$fit)
+#model_1_performance
+```
+
+Adjust the check_model output figure titles. This allows all the text on
+the axis to be legible.
+
+```{r}
+#mp1
+p3 = plot(mp3)
+
+p3[[1]] = p3[[1]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p3[[2]] = p3[[2]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p3[[3]] = p3[[3]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p3[[4]] = p3[[4]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p3 
+```
+
+## Fits another logistic model to the categorical outcome using all (important) predictors of interest.
+
+```{r}
+
+#specify linear model logistic_reg() which generalized linear model for binary outcomes
+model4 = logistic_reg() %>% 
+  set_engine("glm") #fit model generalized linear model 
+
+#fit the linear model to our main predictor
+model_fit_4 = model4 %>% 
+  fit(Nausea ~., data=data)
+  model_fit_4
+
+```
+
+Table of model summary
+
+```{r}
+tidy(model_fit_4) #table of model summary
+```
+
+Plot model as box whisker plot
+
+```{r}
+tidy(model_fit_4) %>% 
+  dwplot(dot_args = list(size = 1, color = "black"),vline = geom_vline(xintercept = 0, colour = "black", linetype = 2),
+         whisker_args = list(color = "blue")) + xlab("Estimate") + theme_minimal()
+```
+
+\*\*Vomiting has the highest estimate at 2.4
+
+Plot performance
+
+```{r}
+mp4 = check_model(model_fit_4$fit)
+
+```
+
+Adjust the check_model output figure titles. This allows all the text on
+the axis to be legible.
+
+```{r}
+
+p4 = plot(mp4)
+
+p4[[1]] = p4[[1]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p4[[2]] = p4[[2]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p4[[3]] = p4[[3]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p4[[4]] = p4[[4]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p4[[5]] = p4[[5]] + theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5))
+p4
+```
+
+## Compares the model results for the categorical model with just the main predictor and all predictors.
+
+```{r}
+compare_performance(model_fit_3,model_fit_4)
+```
