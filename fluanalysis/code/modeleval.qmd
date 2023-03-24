@@ -1,0 +1,165 @@
+---
+title: "Flu Anlaysis - Exploration"
+output:
+  html_document:
+    toc: FALSE
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+## Load Libraries
+
+```{r echo = FALSE}
+# Load Libraries
+library(tidyverse) #data exploration packages
+library(dplyr) #piping
+library(here) #data location
+library(tidyr)
+library(gt) #create tables 
+library(scales) #build unique color pallets
+library(plotly)
+library(ggpubr)
+library(tidymodels)
+library(glmnet)
+
+```
+
+## Load the data
+
+```{r}
+#path to clean data
+data = readRDS(here("fluanalysis", "data", "cleandata.rds")) #load RDS file
+```
+
+## Check the data
+
+```{r}
+#check the data to make sure it has loaded properly
+head(data)
+```
+## Data Splitting 
+```{r}
+# set seed 
+set.seed(456)
+
+## Split the data into test and training
+data_split=initial_split(data,strata = Nausea)
+
+#create training and test
+data_train=training(nausea_split)
+data_test=testing(nausea_split)
+```
+
+
+## Create Workflow Fit Model
+
+```{r}
+#logistical model because of categorical outcome
+recipe_1=recipe(Nausea~.,data=data_train)
+log_mod=logistic_reg()%>%
+  set_engine("glm")
+```
+
+```{r}
+#create workflow
+workflow_1=workflow()%>%
+  add_model(log_mod)%>%
+  add_recipe(recipe_1)
+nausea_workflow
+
+#fit the model with training set
+model_fit=workflow_1%>%
+  fit(data=data_train)
+model_fit%>%
+  extract_fit_parsnip()%>%
+  tidy()
+```
+
+
+```{r}
+#model evaluation
+predict(model_fit,data_train)
+model_train_eval=augment(model_fit,data_train)
+```
+
+```{r}
+#ROC curve to estimate area
+model_train_eval %>% 
+  roc_curve(truth = Nausea, .pred_No) %>%
+  autoplot()
+
+#AUC
+model_train_eval %>%
+  roc_auc(truth = Nausea, .pred_No)
+```
+
+
+## Predict 
+```{r}
+
+# eval
+predict(model_fit,data_test)
+model_test_eval=augment(model_fit,data_test)
+
+#ROC curve to estimate area
+model_test_eval%>%
+  roc_curve(truth=Nausea,.pred_No)%>%
+  autoplot()
+
+#AUC
+model_test_eval=augment(model_fit,data_test)
+model_test_eval%>%
+  roc_auc(truth=Nausea,.pred_No)
+```
+
+
+## fit model with main predictor
+```{r}
+set.seed(5678)
+
+recipe_2=recipe(Nausea~RunnyNose,data=data_train)
+
+#logistical model
+log_mod=logistic_reg()%>%
+  set_engine("glm")
+
+workflow_2=workflow()%>%
+  add_model(log_mod)%>%
+  add_recipe(recipe_2)
+nausea_workflow
+
+model_2=workflow_2%>%
+  fit(data=data_train)
+model_2%>%
+  extract_fit_parsnip()%>%
+  tidy()
+```
+
+## Use model to predict
+```{r}
+# model eval training set ROC
+predict(model_2,data_train)
+model_train_eval_2=augment(model_2,data_train)
+model_train_eval_2%>%
+  roc_curve(truth=Nausea,.pred_No)%>%
+  autoplot()
+#AUC
+model_train_eval_2%>%
+  roc_auc(truth=Nausea,.pred_No)
+
+
+```
+```{r}
+# ROC and prediction
+predict(model_2,data_test)
+model_test_eval_2=augment(model_2,data_test)
+model_test_eval_2%>%
+  roc_curve(truth=Nausea,.pred_No)%>%
+  autoplot()
+
+# AUC
+model_test_eval_2%>%
+  roc_auc(truth=Nausea,.pred_No)
+```
+
