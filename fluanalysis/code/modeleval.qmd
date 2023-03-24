@@ -44,8 +44,8 @@ set.seed(456)
 data_split=initial_split(data,strata = Nausea)
 
 #create training and test
-data_train=training(nausea_split)
-data_test=testing(nausea_split)
+data_train=training(data_split)
+data_test=testing(data_split)
 ```
 
 
