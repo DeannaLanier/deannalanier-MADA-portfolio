@@ -1,0 +1,99 @@
+---
+title: "Flu Anlaysis - Model Evaluation"
+output:
+  html_document:
+    toc: FALSE
+editor: 
+  markdown: 
+    wrap: 72
+---
+```{r}
+library(tidymodels)
+library(tidyverse)
+```
+
+################# This section is added by Aidan Troha ########################
+
+We will be using the data from the cleaned flu analysis data, so we will need to load the data from the `data` folder.
+
+```{r}
+dat <- readRDS(here::here("fluanalysis","data","cleandata.rds"))
+```
+# Generating training and test data sets
+We'll then need to find a way to create a dummy data set, called the test data set, from the cleaned data. We will use this data to test the efficacy of the generated model. We will use the remaining data, the training data set, to fit the model.
+
+To attempt this, we will set a seed with `set.seed()` for randomization to ensure that these processes are reproducible. Further, we use `initial_split()` from the `rsample` package to generate a splitting rule for the `training` and `test` data sets.
+
+```{r}
+set.seed(55555)
+data_split <- rsample::initial_split(dat,prop=7/10)
+training_data <- training(data_split)
+test_data <- testing(data_split)
+```
+# Generating a worklow
+We intend to use the `tidymodels` workflow to generate our linear regression model. Within this workflow, we use `recipe()` and `worklfow()` to identify the relationships of interest.
+
+```{r}
+# Initialize the interactions we are interested in
+flu_line_rec <- recipe(BodyTemp ~ ., data = training_data)
+# Initialize the logistic regression formula
+line_mod <-  linear_reg() %>%
+             set_engine("lm")
+# Initialize the workflow
+flu_wflowP2 <- 
+             workflow() %>%
+             add_model(line_mod) %>%
+             add_recipe(flu_line_rec)
+flu_wflowP2
+```
+
+Now that we have generated the workflow, we can fit the model to the training and test data sets, respectively.
+
+```{r}
+training_fit <- flu_wflowP2 %>%
+                fit(data = training_data)
+
+test_fit <- flu_wflowP2 %>%
+            fit(data = test_data)
+```
+
+# Fitting the model with primary predictor
+
+Now, let's choose only 1 predictor instead of using all of them.
+
+```{r}
+flu_line_rec2 <- recipe(BodyTemp ~ RunnyNose, data = training_data)
+
+flu_wflow2 <- 
+             workflow() %>%
+             add_model(line_mod) %>%
+             add_recipe(flu_line_rec2)
+
+training_fit2 <- flu_wflow2 %>%
+                fit(data = training_data)
+
+test_fit2 <- flu_wflow2 %>%
+            fit(data = test_data)
+```
+
+We now want to compare the estimates across both models for each data set. To do this, we use `augment()`.
+
+```{r}
+training_aug <- augment(training_fit, training_data)
+test_aug <- augment(test_fit, test_data)
+training_aug2 <- augment(training_fit2, training_data)
+test_aug2 <- augment(test_fit2, test_data)
+```
+
+If we want to assess how well the model makes predictions, we can evaluate this with the Root Mean Squared Error, the RMSE, for continuous variable. `rmse` from the  `Metrics` package will evaluate the fit of the model on the `training_data` and the `test_data`, separately.
+
+```{r}
+# Model with all predictors
+Metrics::rmse(actual = training_aug$BodyTemp, predicted = training_aug$.pred)
+Metrics::rmse(actual = test_aug$BodyTemp, predicted = test_aug$.pred)
+# Model with main predictor alone
+Metrics::rmse(actual = training_aug2$BodyTemp, predicted = training_aug2$.pred)
+Metrics::rmse(actual = test_aug2$BodyTemp, predicted = test_aug2$.pred)
+```
+# Conclusion
+The Data above show that the model with all the possible predictors is the best model to fit the data as it minimizes the Root Mean Squared Errors (RMSE) of the data.
