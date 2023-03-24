@@ -16,10 +16,7 @@ library(tidyverse) #data exploration packages
 library(dplyr) #piping
 library(here) #data location
 library(tidyr)
-library(gt) #create tables 
 library(scales) #build unique color pallets
-library(plotly)
-library(ggpubr)
 library(tidymodels)
 library(glmnet)
 
