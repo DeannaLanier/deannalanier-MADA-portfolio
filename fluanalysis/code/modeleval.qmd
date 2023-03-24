@@ -63,7 +63,7 @@ log_mod=logistic_reg()%>%
 workflow_1=workflow()%>%
   add_model(log_mod)%>%
   add_recipe(recipe_1)
-nausea_workflow
+workflow_1
 
 #fit the model with training set
 model_fit=workflow_1%>%
