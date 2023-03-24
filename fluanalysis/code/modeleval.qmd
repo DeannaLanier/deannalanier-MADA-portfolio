@@ -124,7 +124,7 @@ log_mod=logistic_reg()%>%
 workflow_2=workflow()%>%
   add_model(log_mod)%>%
   add_recipe(recipe_2)
-nausea_workflow
+workflow_2
 
 model_2=workflow_2%>%
   fit(data=data_train)
