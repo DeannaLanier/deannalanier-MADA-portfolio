@@ -19,6 +19,7 @@ library(dplyr)
 library(here) 
 library(skimr)
 library(tidyr)
+library(tidymodels)
 ```
 
 ## Load the data
@@ -50,9 +51,71 @@ clean_data = raw_data %>% #create new variable to ensure raw_data is not manipul
   na.omit() #remove all observations with NA
 ```
 
+## Additional Processing (added for machine learning modeling Module 11)
+
+**remove yes/no versions for symptoms with multiple levels**
+```{r}
+clean_data_update =
+  clean_data %>%
+  select(!c(WeaknessYN, CoughYN, MyalgiaYN, CoughYN2))
+```
+
+
+**categorical/ordinal predictors**
+there are categorical and ordinal predictors. Code categorical variables as unordered factors and others as ordered factors.
+```{r}
+# categorical productors 
+unorderedRecipe = recipe(~ SwollenLymphNodes + ChestCongestion + ChillsSweats + NasalCongestion + Sneeze + Fatigue + SubjectiveFever + Headache + RunnyNose + AbPain + ChestPain + Diarrhea + EyePn + Insomnia + ItchyEye + Nausea + EarPn + Pharyngitis + Breathless + ToothPn + Vomit + Wheeze, data = clean_data_update)
+
+unorderedTest = unorderedRecipe %>%
+  step_dummy(all_predictors()) %>%
+  prep(training = clean_data_update)
+
+categoricalTestData = bake(unorderedTest, new_data = NULL)
+```
+
+```{r}
+#ordinal predictor
+
+#specify the ordinal levels as found in the data
+ordinalLevels = c("None", "Mild", "Moderate", "Severe")
+clean_data_update = clean_data_update %>%
+  mutate(Weakness = ordered(Weakness),
+         CoughIntensity = ordered(CoughIntensity),
+         Myalgia = ordered(Myalgia))
+
+#create recipe (like categorical above)
+ordinalRecipe = recipe(~ Weakness + CoughIntensity + Myalgia, data = clean_data_update)
+ordinalTest = ordinalRecipe %>%
+  step_ordinalscore(all_predictors()) %>%
+  prep(training = clean_data_update)
+ordinalTestData <- bake(ordinalTest, new_data = NULL)
+```
+
+
+**identify and remove binary predictors that have <50 entries in one category**
+```{r}
+summary(clean_data_update)
+# vision and hearing have les than 50
+
+clean_data_update = 
+  clean_data_update %>%
+  select(!c(Vision, Hearing))
+
+```
+
+
 ## Save RDS File
 
 ```{r}
+#save cleaned data
 cleandata_location = here("fluanalysis", "data", "cleandata.rds")
 saveRDS(clean_data, file = cleandata_location)
 ```
+
+```{r}
+# save cleaned data after Module 11
+cleandata_location2 = here("fluanalysis", "data", "cleandata2.rds")
+saveRDS(clean_data_update, file = cleandata_location2)
+```
+
