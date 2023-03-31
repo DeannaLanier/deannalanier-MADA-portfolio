@@ -1,0 +1,54 @@
+---
+title: "Flu Anlaysis - Machine Learning"
+output:
+  html_document:
+    toc: FALSE
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+## Load Libraries
+
+```{r echo = FALSE}
+# Load Libraries
+library(tidyverse) #data exploration packages
+library(dplyr) #piping
+library(here) #data location
+library(tidyr)
+library(scales) #build unique color pallets
+library(tidymodels)
+library(glmnet)
+```
+
+## Load the data
+
+```{r}
+#path to clean data
+data = readRDS(here("fluanalysis", "data", "cleandata.rds")) #load RDS file
+```
+
+## Check the data
+
+```{r}
+#check the data to make sure it has loaded properly
+head(data)
+```
+## Data Splitting 
+```{r}
+# set seed 
+set.seed(456)
+
+## Split the data into test and training
+data_split=initial_split(data,strata = Nausea)
+
+#create training and test
+data_train=training(data_split)
+data_test=testing(data_split)
+```
+
+
+
+
+# Conclusion
+The Data above show that the model with all the possible predictors is the best model to fit the data as it minimizes the Root Mean Squared Errors (RMSE) of the data.
