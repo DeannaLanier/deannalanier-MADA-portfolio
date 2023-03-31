@@ -277,7 +277,7 @@ Loading required package: rpart
 ✖ dials::prune()    masks rpart::prune()
 ✖ yardstick::spec() masks readr::spec()
 ✖ recipes::step()   masks stats::step()
-• Search for functions across packages at https://www.tidymodels.org/find/
+• Learn how to get started at https://www.tidymodels.org/start/
 
 Loading required package: Matrix
 
@@ -1889,7 +1889,6 @@ To silence this warning:
 1    0.0000000001          1 rmse    standard    1.19    25  0.0181 Preprocesso…</code></pre>
 </div>
 </div>
-<p>RMSE for the best fit tree model = 1.18</p>
 </section>
 </section>
 <section id="lasso" class="level2">
@@ -2155,7 +2154,6 @@ and 22 more lines.</code></pre>
 1  0.0621 rmse    standard    1.15    25  0.0169 Preprocessor1_Model28</code></pre>
 </div>
 </div>
-<p>RMSE for the best fit LASSO model is 1.18</p>
 </section>
 </section>
 <section id="random-forest" class="level2">
@@ -2386,13 +2384,12 @@ R squared (OOB):                  0.06240402 </code></pre>
 1     6    33 rmse    standard    1.17    25  0.0166 Preprocessor1_Model23</code></pre>
 </div>
 </div>
-<p>Random forest RMSE for the best fit is 1.18</p>
 </section>
 </section>
 </section>
 <section id="final-evaluation" class="level1">
 <h1>Final Evaluation</h1>
-<p>When rounding to 2 sig figures, the RMSE is the same for all 3 models. All models had similar performance. When using the plots for visual analysis of the performance, you can see there is more of a visual relationship using LASSO and Random Forest but not the tree model. I selected the Lasso model because when accounting for more significant figures, it is lower.</p>
+<p>All models have similar performance based on RMSE. When using the plots for visual analysis of the performance, you can see there is more of a visual relationship using LASSO and Random Forest but not the tree model. I selected the Lasso model because when accounting for more significant figures, it is lower.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb170"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb170-1"><a href="#cb170-1" aria-hidden="true" tabindex="-1"></a><span class="co">#fit the test data once </span></span>
 <span id="cb170-2"><a href="#cb170-2" aria-hidden="true" tabindex="-1"></a>lasso_lastfit <span class="ot">=</span> lasso_f_workflow <span class="sc">%&gt;%</span></span>
