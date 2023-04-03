@@ -546,9 +546,3 @@ nullf_test %>% collect_metrics()
 #lasso_last_residual
 ```
 
-
-# Conclusion
-
-The Data above show that the model with all the possible predictors is
-the best model to fit the data as it minimizes the Root Mean Squared
-Errors (RMSE) of the data.
