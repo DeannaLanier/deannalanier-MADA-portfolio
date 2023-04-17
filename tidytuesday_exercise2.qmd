@@ -5,4 +5,231 @@ output:
     toc: FALSE
 ---
 
-# To be filled
+# Tidy Tuesday Egg Production
+
+## 1 Load Wrangle and Explore the data
+
+### packages
+
+```{r}
+library(tidytuesdayR)
+library(tidyverse) 
+library(lubridate) #change data type to data
+library(skimr) #skim dataframes
+library(gt) #create tables 
+library(knitr) #format table output
+library(kableExtra)
+library(here)
+library(janitor)
+library(tidymodels)
+library(rpart)
+library(glmnet)
+library(rpart.plot)
+library(vip)
+
+```
+
+### Load data
+
+```{r}
+data = tidytuesdayR::tt_load('2023-04-11')
+summary(data)
+```
+
+### Wrangle the data
+
+```{r}
+#format into dataframes
+eggData = data[["egg-production"]][, 1:5] #save without the source as it is not important
+cagefreeData = data[["cage-free-percentages"]][, 1:3] #save without the source as it is not important
+```
+
+```{r}
+#add a column for the ratio of eggs to hens to the egg dataframe
+eggData = transform(
+  eggData, egg_to_hen= n_eggs/n_hens)
+```
+
+
+```{r}
+skim(eggData)
+```
+
+```{r}
+skim(cagefreeData)
+```
+
+###Explore Egg Data
+
+```{r}
+#table of the egg data
+tibble(eggData)
+```
+
+**Egg Production Data Dictionary**
+
+| Variable       | Class     | Description                                                                                                                                             |
+|-------------------------|-------------------|-----------------------------|
+| observed_month | double    | Month in which report observations are collected,Dates are recorded in ISO 8601 format YYYY-MM-DD                                                       |
+| prod_type      | character | type of egg product: hatching, table eggs                                                                                                               |
+| prod_process   | character | type of production process and housing: cage-free (organic), cage-free (non-organic), all. The value 'all' includes cage-free and conventional housing. |
+| n_hens         | double    | number of hens produced by hens for a given month-type-process combo                                                                                    |
+| n_eggs         | double    | number of eggs producing eggs for a given month-type-process combo                                                                                      |
+
+Plot the data to explore
+
+```{r}
+#Plot the data 
+  # Relationship between the number of eggs laid and the number of hens 
+ggplot() +
+    geom_point(data = eggData, aes(x = log(n_eggs), y = log(n_hens), color = prod_process), shape = 20) +
+    theme_bw()+ggtitle("Number of Hens vs. Number of Eggs Laid") +
+    labs(x = "Eggs (log)", y = "Hens (log)")
+```
+
+```{r}
+#Plot the relationship between the number of eggs laid and the number of hens grouped by the production type
+ggplot() +
+    geom_point(data = eggData, aes(x = log(n_eggs), y = log(n_hens), color = prod_process), shape = 20) +
+    theme_bw()+ggtitle("Number of Hens vs. Number of Eggs Laid by Production Type") +
+    labs(x = "Eggs (log)", y = "Hens (log)")+
+    facet_wrap(.~prod_type)
+```
+
+```{r}
+# Plot the number of eggs-per-hen separated my the production process and type
+ggplot(eggData, aes(x = prod_type, y = egg_to_hen)) +
+  geom_boxplot(aes(color = prod_process)) +
+  theme_bw() +
+  labs(x = "Production Type", y = "Eggs-per-hen", title = "Eggs per hen ") 
+```
+
+Plot the number of eggs hatched by year
+
+```{r}
+#Separate by the product type 
+ggplot()+
+  geom_point(aes(x=observed_month, y= log(n_eggs), group=prod_process, color=prod_process), data=eggData,shape = 20)+
+  theme_bw()+ggtitle("Number of Eggs Laid per Year") +
+  labs(x = "Year", y = "Eggs (log scale)")+
+  facet_wrap(.~prod_type)
+```
+
+Plot the number of eggs hatched by year
+
+```{r}
+#No separation  
+ggplot()+
+  geom_point(aes(x=observed_month, y= log(n_eggs), group=prod_process, color=prod_process), data=eggData,shape = 20)+
+  theme_bw()+ggtitle("Number of Eggs Laid per Year") +
+  labs(x = "Year", y = "Number of Eggs (log scale)")
+```
+
+Based on the explorations, we can see there is a vast difference between the number of eggs produced for table eggs and hatching eggs. The number of eggs to hens is fairly consistent for the table eggs but the hatching eggs have a lower egg-to-hen ratio. 
+
+
+#### Explore the Cage Free Data
+
+```{r}
+#table of the cage free data
+tibble(cagefreeData)
+```
+
+**Cage-Free Eggs Data Dictionary**
+
+| Variable       | Class  | Description                                                                                                                                           |
+|-------------------------|-------------------|-----------------------------|
+| observed_month | double | Month in which report observations are collected,Dates are recorded in ISO 8601 format YYYY-MM-DD                                                     |
+| percent_hens   | double | observed or computed percentage of cage-free hens relative to all table-egg-laying hens                                                               |
+| percent_eggs   | double | computed percentage of cage-free eggs relative to all table eggs,This variable is not available for data sourced from the Egg Markets Overview report |
+
+```{r}
+# plot the percent of cage free eggs overtime
+ggplot(cagefreeData, aes(x = observed_month, y = percent_eggs)) +
+  geom_point() +
+  geom_line() +
+  theme_bw() + scale_x_date(limit=c(as.Date("2016-01-01"),as.Date("2022-01-01")))+
+  labs(x = "Year", y = "Percent of cage free eggs", title = "Percent of cage free eggs in different years") 
+```
+
+```{r}
+# plot the percent of cage free hens overtime
+ggplot(cagefreeData, aes(x = observed_month, y = percent_hens)) +
+  geom_line() +
+  theme_bw() + 
+  labs(x = "Year", y = "Percent of cage free hens", title = "Percent of cage free hens in different years") 
+```
+After exploration of the cage free data, I have decided to focus on the egg-production dataset for further modeling.
+
+## 2 Question/Hypothesis
+Can eggs-to-hens predict the production process and production type?? 
+Predictor: egg/hen ratio
+Outcome: Production process and production type
+## 3 Preprocess, Clean, Split
+
+**Preprocess**
+```{r}
+#New dataframe only with data of interest
+
+eggs_model_data = eggData %>%
+  select(prod_type, prod_process, egg_to_hen)%>%
+   mutate_if(sapply(eggs_model_data, is.character), as.factor)
+
+glimpse(eggs_model_data)
+
+skimr::skim(eggs_model_data) 
+```
+
+
+**split the data into a test and training set**
+```{r}
+set.seed(123)
+
+data_split = initial_split(eggs_model_data, prop = 7/10) 
+
+data_train = training(data_split) 
+data_test  = testing(data_split)
+```
+
+```{r}
+# 3 fold cross-validation repeated 3 times 
+cv_data = vfold_cv(data_train, v = 3, repeats = 3)
+
+# Creating a recipe with eggs to hen as the predictor against both outcomes
+data_recipe1 = recipe(prod_type+prod_process~ egg_to_hen, data = data_train)
+
+```
+
+
+### Null Model
+
+
+
+
+
+
+
+## 4 Fit ML models
+
+Fit at least 4 different ML models to the data using the tidymodels framework we practiced. Use the CV approach for model training/fitting. Explore the quality of each model by looking at performance, residuals, uncertainty, etc. All of this should still be evaluated using the training/CV data. You can of course recycle code from the previous exercise, but I also encourage you to explore further, e.g. try different ML models or use different metrics. You might have to do that anyway, depending on your question/outcome.
+
+
+
+### Random Forest
+
+### Lasso
+
+### Decision Trees
+
+
+## 5 Model Selection
+
+Based on the model evaluations, decide on one model you think is overall best. Explain why. It doesn't have to be the model with the best performance. You make the choice, just explain why you picked the one you picked.
+
+## 6 Evaluate Selected Model
+
+As a final, somewhat honest assessment of the quality of the model you chose, evaluate it (performance, residuals, uncertainty, etc.) on the test data. This is the only time you are allowed to touch the test data, and only once. Report model performance on the test data.
+
+## 7 Summary
+
+Summarize everything you did and found in a discussion. Of course, your Rmd file should contain commentary/documentation on everything you do for each step.
