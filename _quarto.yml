@@ -32,7 +32,7 @@ website:
             href: ./fluanalysis/code/modeleval.html
           - text: "Machine Learning"
             href: ./fluanalysis/code/machinelearning.html
-            
+      - text: "My Project Analysis"
     right:
       - icon: github 
         href: https://github.com/DeannaLanier/deannalanier-MADA-portfolio        
