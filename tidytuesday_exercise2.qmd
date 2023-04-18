@@ -254,8 +254,6 @@ nullf_test %>% collect_metrics()
 
 ## 4 Fit ML models
 
-Fit at least 4 different ML models to the data using the tidymodels framework we practiced. Use the CV approach for model training/fitting. Explore the quality of each model by looking at performance, residuals, uncertainty, etc. All of this should still be evaluated using the training/CV data. You can of course recycle code from the previous exercise, but I also encourage you to explore further, e.g. try different ML models or use different metrics. You might have to do that anyway, depending on your question/outcome.
-
 ### Lasso
 
 ```{r}
@@ -346,34 +344,6 @@ last_fit(
   collect_metrics()
 ```
 
-### Random Forest
-
-```{r}
-#model specifications
-cores = parallel::detectCores()
-cores
-
-#
-randomfor_model <-
-  rand_forest(mtry = tune(), min_n = tune(), trees = 1000) %>%
-  set_engine("ranger", num.threads = cores) %>%
-  set_mode("regression")
-
-#define the workflow 
-randomfor_workflow <-
-  workflow() %>%
-  add_model(randomfor_model) %>%
-  add_recipe(data_recipe1)
-
-
-```
-
-tuning
-
-```{r}
-extract_parameter_set_dials(randomfor_model)
-```
-
 ### Decision Trees
 
 ```{r}
@@ -438,12 +408,10 @@ rpart.plot(extract_fit_parsnip(tree_f_fit)$fit)
 
 ```{r}
 #predicted and residuals
-tree_residuals = tree_f_fit %>%
+tree_train_residuals = tree_f_fit %>%
   augment(data_train) %>% #use augment() to make predictions from train data
   select(c(.pred, egg_to_hen)) %>%
   mutate(.resid = egg_to_hen - .pred) #calculate residuals and make new row.
-
-tree_residuals
 ```
 
 ```{r}
@@ -455,12 +423,28 @@ tree_f_fit %>%
 
 ## 5 Model Selection
 
-Based on the model evaluations, decide on one model you think is overall best. Explain why. It doesn't have to be the model with the best performance. You make the choice, just explain why you picked the one you picked.
+I chose to select the Decision trees model. Although it does not have the lowest RSME, it is very close and I like the visual of seeing the different ratios based on the 2 predictors.
 
 ## 6 Evaluate Selected Model
 
 As a final, somewhat honest assessment of the quality of the model you chose, evaluate it (performance, residuals, uncertainty, etc.) on the test data. This is the only time you are allowed to touch the test data, and only once. Report model performance on the test data.
 
+Tree model residuals on the training data 
+```{r}
+#Predicted residuals 
+tree_residuals
+```
+
+```{r}
+#Residuals on the test data
+tree_train_residuals = tree_f_fit %>%
+  augment(data_test) %>% #use augment() to make predictions from train data
+  select(c(.pred, egg_to_hen)) %>%
+  mutate(.resid = egg_to_hen - .pred) #calculate residuals and make new row.
+tree_train_residuals
+```
+
+
 ## 7 Summary
 
-Summarize everything you did and found in a discussion. Of course, your Rmd file should contain commentary/documentation on everything you do for each step.
+In summary, all the models show production type is the most important predictor for the number of eggs to hens which was the outcome. This supports my hypothesis based on the exploratory analysis. Production product has lower importance in predicting the outcome, however we can see in the trees model that both together can accurately predict the ratio. 
