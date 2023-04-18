@@ -162,9 +162,9 @@ ggplot(cagefreeData, aes(x = observed_month, y = percent_hens)) +
 After exploration of the cage free data, I have decided to focus on the egg-production dataset for further modeling.
 
 ## 2 Question/Hypothesis
-Can eggs-to-hens predict the production process and production type?? 
-Predictor: egg/hen ratio
-Outcome: Production process and production type
+Can production process or  production type be a predictor of egg-to-hen ratio? 
+Outcome: egg/hen ratio
+Predictor: Production process and production type
 ## 3 Preprocess, Clean, Split
 
 **Preprocess**
@@ -172,14 +172,14 @@ Outcome: Production process and production type
 #New dataframe only with data of interest
 
 eggs_model_data = eggData %>%
-  select(prod_type, prod_process, egg_to_hen)%>%
-   mutate_if(sapply(eggs_model_data, is.character), as.factor)
+  mutate_if(sapply(eggData, is.character), as.factor)%>% #change character to factor for modeling
+  select(prod_type, prod_process, egg_to_hen) #select only the features of interest
+   
 
-glimpse(eggs_model_data)
+glimpse(eggs_model_data) #check the data type
 
 skimr::skim(eggs_model_data) 
 ```
-
 
 **split the data into a test and training set**
 ```{r}
@@ -193,19 +193,64 @@ data_test  = testing(data_split)
 
 ```{r}
 # 3 fold cross-validation repeated 3 times 
-cv_data = vfold_cv(data_train, v = 3, repeats = 3)
+
+#CV on training data
+cv_data_train = vfold_cv(data_train, v = 3, repeats = 3)
+
+#CV on test data
+cv_data_test = vfold_cv(data_test, v = 3, repeats = 3)
+
 
 # Creating a recipe with eggs to hen as the predictor against both outcomes
-data_recipe1 = recipe(prod_type+prod_process~ egg_to_hen, data = data_train)
+data_recipe1 = recipe(egg_to_hen~ ., data = data_train)%>%
+  step_dummy(all_nominal(), -all_outcomes())
 
 ```
 
 
 ### Null Model
+```{r}
+
+#create null model
+nullmodel = null_model() %>% 
+  set_engine("parsnip") %>%
+  set_mode("regression")
+
+#create null training model recipe
+nullr_train = recipe(egg_to_hen ~ 1, data = data_train)
+
+#workflow
+nullw_train = workflow() %>%
+  add_model(nullmodel) %>% 
+  add_recipe(nullr_train)
+
+#fit
+nullf_train = fit_resamples(nullw_train, resamples = cv_data_train)
+```
+
+null model recipe with testing data
+```{r}
+#create null training model recipe
+nullr_test = recipe(egg_to_hen ~ 1, data = data_test)
+
+#workflow
+nullw_test = workflow() %>%
+  add_model(nullmodel) %>% 
+  add_recipe(nullr_test)
+
+#fit
+nullf_test = fit_resamples(nullw_test, resamples = cv_data_test)
+```
 
 
+Metrics 
+```{r}
+#RMSE and RSQ for training set
+nullf_train %>% collect_metrics()
 
-
+#RMSE and RSQ for test set
+nullf_test %>% collect_metrics()
+```
 
 
 
@@ -215,12 +260,189 @@ Fit at least 4 different ML models to the data using the tidymodels framework we
 
 
 
-### Random Forest
-
 ### Lasso
 
-### Decision Trees
+```{r}
+#Model Specification
+lasso_mod = linear_reg(penalty = tune(),mixture=1) %>% 
+  set_engine("glmnet")%>%
+  set_mode("regression")
 
+#Define the workflow 
+lasso_workflow = workflow() %>%
+  add_model(lasso_mod) %>%
+  add_recipe(data_recipe1)
+
+#tune grid specification
+lasso_grid = tibble(penalty = 10^seq(-4, -1, length.out = 30))
+```
+
+tuning
+```{r}
+#tune using cross validation
+lasso_cv = lasso_workflow %>%
+  tune_grid(resamples = cv_data_train,
+            grid = lasso_grid,
+            control = control_grid(verbose = FALSE, save_pred = TRUE))
+
+lasso_cv%>% collect_metrics()
+
+#visualize the performance
+lasso_cv %>%
+  collect_metrics() %>%
+  ggplot(aes(penalty, mean, color = .metric)) +
+  geom_errorbar(aes(
+    ymin = mean - std_err,
+    ymax = mean + std_err
+  ),
+  alpha = 0.5
+  ) +
+  geom_line(size = 1.5) +
+  facet_wrap(~.metric, scales = "free", nrow = 2) +
+  scale_x_log10() +
+  theme(legend.position = "none")
+```
+select the best model
+```{r}
+#Best Models
+lasso_best = lasso_cv %>%
+  select_best("rmse", maximize = FALSE) #lowest rsme
+
+#final workflow
+lasso_f_workflow = finalize_workflow(
+  lasso_workflow ,
+  lasso_best
+)
+#final lasso model fit
+lasso_f_fit = lasso_f_workflow %>% fit(data=data_train)
+
+#Visualize Lasso Variable Importance
+lasso_f_fit %>%
+  pull_workflow_fit() %>%
+  vi(lambda = lasso_best$penalty) %>%
+  mutate(
+    Importance = abs(Importance),
+    Variable = fct_reorder(Variable, Importance)
+  ) %>%
+  ggplot(aes(x = Importance, y = Variable, fill = Sign)) +
+  geom_col() +
+  scale_x_continuous(expand = c(0, 0)) +
+  labs(y = NULL)
+```
+residuals
+```{r}
+lasso_residual = lasso_f_fit %>%
+  augment(data_train) %>% 
+  select(c(.pred, egg_to_hen)) %>%
+  mutate(resid = egg_to_hen - .pred) 
+lasso_residual
+```
+```{r}
+last_fit(
+  lasso_f_fit,
+  data_split
+) %>%
+  collect_metrics()
+```
+
+
+### Random Forest
+```{r}
+#model specifications
+cores = parallel::detectCores()
+cores
+
+#
+randomfor_model <-
+  rand_forest(mtry = tune(), min_n = tune(), trees = 1000) %>%
+  set_engine("ranger", num.threads = cores) %>%
+  set_mode("regression")
+
+#define the workflow 
+randomfor_workflow <-
+  workflow() %>%
+  add_model(randomfor_model) %>%
+  add_recipe(data_recipe1)
+
+
+```
+tuning
+```{r}
+extract_parameter_set_dials(randomfor_model)
+```
+
+
+
+### Decision Trees
+```{r}
+#model specification 
+tree_spec = decision_tree(cost_complexity = tune(),tree_depth = tune())%>%
+  set_engine("rpart")%>%
+  set_mode("regression")
+
+tree_workflow = workflow()%>%
+  add_model(tree_spec)%>%
+  add_recipe(data_recipe1) #recipe created in step 4 of the setup
+
+tree_grid = grid_regular(cost_complexity(),
+                         tree_depth(),
+                         levels = 3)
+#depth
+tree_grid %>%
+  count(tree_depth)
+```
+```{r}
+tree_cv = tree_workflow %>%
+  tune_grid(
+    resamples = cv_data_train,
+    grid = tree_grid
+  )
+```
+
+```{r}
+#use collect metrics to give tibble with the results from the tuning
+tree_cv %>%
+  collect_metrics()
+```
+
+```{r}
+tree_cv %>% autoplot()
+```
+```{r}
+tree_cv %>%
+  show_best(metric = "rmse")
+```
+```{r}
+tree_best = tree_cv %>%
+  select_best(metric = "rmse")
+tree_best
+```
+```{r}
+tree_f_workflow = tree_workflow %>%
+  finalize_workflow(tree_best)
+
+tree_f_fit = tree_f_workflow %>% fit(data=data_train)
+tree_f_fit
+```
+```{r}
+#plot tree
+rpart.plot(extract_fit_parsnip(tree_f_fit)$fit)
+```
+```{r}
+#predicted and residuals
+tree_residuals = tree_f_fit %>%
+  augment(data_train) %>% #use augment() to make predictions from train data
+  select(c(.pred, egg_to_hen)) %>%
+  mutate(.resid = egg_to_hen - .pred) #calculate residuals and make new row.
+
+tree_residuals
+```
+```{r}
+#final tree variable importance
+tree_f_fit %>% 
+  extract_fit_parsnip() %>% 
+  vip()
+```
 
 ## 5 Model Selection
 
