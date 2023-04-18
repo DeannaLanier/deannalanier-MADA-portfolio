@@ -50,7 +50,6 @@ eggData = transform(
   eggData, egg_to_hen= n_eggs/n_hens)
 ```
 
-
 ```{r}
 skim(eggData)
 ```
@@ -125,8 +124,7 @@ ggplot()+
   labs(x = "Year", y = "Number of Eggs (log scale)")
 ```
 
-Based on the explorations, we can see there is a vast difference between the number of eggs produced for table eggs and hatching eggs. The number of eggs to hens is fairly consistent for the table eggs but the hatching eggs have a lower egg-to-hen ratio. 
-
+Based on the explorations, we can see there is a vast difference between the number of eggs produced for table eggs and hatching eggs. The number of eggs to hens is fairly consistent for the table eggs but the hatching eggs have a lower egg-to-hen ratio.
 
 #### Explore the Cage Free Data
 
@@ -159,15 +157,15 @@ ggplot(cagefreeData, aes(x = observed_month, y = percent_hens)) +
   theme_bw() + 
   labs(x = "Year", y = "Percent of cage free hens", title = "Percent of cage free hens in different years") 
 ```
+
 After exploration of the cage free data, I have decided to focus on the egg-production dataset for further modeling.
 
 ## 2 Question/Hypothesis
-Can production process or  production type be a predictor of egg-to-hen ratio? 
-Outcome: egg/hen ratio
-Predictor: Production process and production type
-## 3 Preprocess, Clean, Split
+
+Can production process or production type be a predictor of egg-to-hen ratio? Outcome: egg/hen ratio Predictor: Production process and production type \## 3 Preprocess, Clean, Split
 
 **Preprocess**
+
 ```{r}
 #New dataframe only with data of interest
 
@@ -182,6 +180,7 @@ skimr::skim(eggs_model_data)
 ```
 
 **split the data into a test and training set**
+
 ```{r}
 set.seed(123)
 
@@ -207,8 +206,8 @@ data_recipe1 = recipe(egg_to_hen~ ., data = data_train)%>%
 
 ```
 
-
 ### Null Model
+
 ```{r}
 
 #create null model
@@ -229,6 +228,7 @@ nullf_train = fit_resamples(nullw_train, resamples = cv_data_train)
 ```
 
 null model recipe with testing data
+
 ```{r}
 #create null training model recipe
 nullr_test = recipe(egg_to_hen ~ 1, data = data_test)
@@ -242,8 +242,8 @@ nullw_test = workflow() %>%
 nullf_test = fit_resamples(nullw_test, resamples = cv_data_test)
 ```
 
+Metrics
 
-Metrics 
 ```{r}
 #RMSE and RSQ for training set
 nullf_train %>% collect_metrics()
@@ -252,13 +252,9 @@ nullf_train %>% collect_metrics()
 nullf_test %>% collect_metrics()
 ```
 
-
-
 ## 4 Fit ML models
 
 Fit at least 4 different ML models to the data using the tidymodels framework we practiced. Use the CV approach for model training/fitting. Explore the quality of each model by looking at performance, residuals, uncertainty, etc. All of this should still be evaluated using the training/CV data. You can of course recycle code from the previous exercise, but I also encourage you to explore further, e.g. try different ML models or use different metrics. You might have to do that anyway, depending on your question/outcome.
-
-
 
 ### Lasso
 
@@ -278,6 +274,7 @@ lasso_grid = tibble(penalty = 10^seq(-4, -1, length.out = 30))
 ```
 
 tuning
+
 ```{r}
 #tune using cross validation
 lasso_cv = lasso_workflow %>%
@@ -302,7 +299,9 @@ lasso_cv %>%
   scale_x_log10() +
   theme(legend.position = "none")
 ```
+
 select the best model
+
 ```{r}
 #Best Models
 lasso_best = lasso_cv %>%
@@ -329,6 +328,7 @@ lasso_f_fit %>%
   scale_x_continuous(expand = c(0, 0)) +
   labs(y = NULL)
 ```
+
 residuals
 ```{r}
 lasso_residual = lasso_f_fit %>%
@@ -337,6 +337,7 @@ lasso_residual = lasso_f_fit %>%
   mutate(resid = egg_to_hen - .pred) 
 lasso_residual
 ```
+
 ```{r}
 last_fit(
   lasso_f_fit,
@@ -345,8 +346,8 @@ last_fit(
   collect_metrics()
 ```
 
-
 ### Random Forest
+
 ```{r}
 #model specifications
 cores = parallel::detectCores()
@@ -366,14 +367,15 @@ randomfor_workflow <-
 
 
 ```
+
 tuning
+
 ```{r}
 extract_parameter_set_dials(randomfor_model)
 ```
 
-
-
 ### Decision Trees
+
 ```{r}
 #model specification 
 tree_spec = decision_tree(cost_complexity = tune(),tree_depth = tune())%>%
@@ -391,6 +393,7 @@ tree_grid = grid_regular(cost_complexity(),
 tree_grid %>%
   count(tree_depth)
 ```
+
 ```{r}
 tree_cv = tree_workflow %>%
   tune_grid(
@@ -408,15 +411,18 @@ tree_cv %>%
 ```{r}
 tree_cv %>% autoplot()
 ```
+
 ```{r}
 tree_cv %>%
   show_best(metric = "rmse")
 ```
+
 ```{r}
 tree_best = tree_cv %>%
   select_best(metric = "rmse")
 tree_best
 ```
+
 ```{r}
 tree_f_workflow = tree_workflow %>%
   finalize_workflow(tree_best)
@@ -424,10 +430,12 @@ tree_f_workflow = tree_workflow %>%
 tree_f_fit = tree_f_workflow %>% fit(data=data_train)
 tree_f_fit
 ```
+
 ```{r}
 #plot tree
 rpart.plot(extract_fit_parsnip(tree_f_fit)$fit)
 ```
+
 ```{r}
 #predicted and residuals
 tree_residuals = tree_f_fit %>%
@@ -437,6 +445,7 @@ tree_residuals = tree_f_fit %>%
 
 tree_residuals
 ```
+
 ```{r}
 #final tree variable importance
 tree_f_fit %>% 
